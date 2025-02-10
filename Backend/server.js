@@ -1,0 +1,350 @@
+// Required Modules
+import bcrypt from "bcryptjs";
+import cors from "cors";
+import dotenv from "dotenv";
+import express from "express";
+import rateLimit from "express-rate-limit";
+import mysql from "mysql2";
+
+// Load environment variables
+dotenv.config();
+
+// Initialize express app
+const app = express();
+const port = 8081;
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: "Too many requests from this IP, please try again later",
+});
+
+app.use(limiter);
+
+
+// Database connection configuration
+const db = mysql.createConnection({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+});
+
+// Connect to the database
+db.connect((err) => {
+  if (err) {
+    console.error("Database connection failed:", err.message);
+    console.error( err.message);
+    return setTimeout(() => db.connect(), 5000); // Retry after 5s
+  }
+  console.log("Connected to the database.");
+});
+
+
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    const { username, email, password, confirmPassword, phone, role, plant } = req.body;
+
+    if (!username || !email || !password || !confirmPassword || !phone || !role || !plant) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({ message: 'Passwords do not match' });
+    }
+
+    if (!isStrongPassword(password)) {
+      return res.status(400).json({ message: 'Password must be strong' });
+    }
+
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ message: 'Invalid email address' });
+    }
+
+    if (!isValidPhone(phone)) {
+      return res.status(400).json({ message: 'Invalid phone number' });
+    }
+
+    db.query(
+      'SELECT * FROM users WHERE username = ? OR email = ?',
+      [username, email],
+      (error, results) => {
+        if (error) {
+          console.error('Database query error:', error);
+          return res.status(500).json({ message: 'Server error during registration' });
+        }
+        if (results.length > 0) {
+          return res.status(400).json({ message: 'User already exists' });
+        }
+
+        bcrypt.hash(password, 10, (err, hashedPassword) => {
+          if (err) {
+            console.error('Bcrypt error:', err);
+            return res.status(500).json({ message: 'Server error during password hashing' });
+          }
+
+          db.query(
+            'INSERT INTO users (username, email, password, phone, role, plant) VALUES (?, ?, ?, ?, ?, ?)',
+            [username, email, hashedPassword, phone, role, plant],
+            (error, result) => {
+              if (error) {
+                console.error('Database insert error:', error);
+                return res.status(500).json({ message: 'Server error during registration' });
+              }
+              res.status(201).json({
+                message: 'User registered successfully',
+                userId: result.insertId
+              });
+            }
+          );
+        });
+      }
+    );
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(500).json({ message: 'Server error during registration' });
+  }
+});
+
+
+
+
+
+// User login
+app.post('/api/auth/login', (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).json({ message: 'Username and password are required' });
+    }
+
+    db.query(
+      'SELECT * FROM users WHERE username = ?',
+      [username],
+      (error, results) => {
+        if (error) {
+          console.error('Database query error:', error);
+          return res.status(500).json({ message: 'Server error during login' });
+        }
+
+        if (results.length === 0) {
+          return res.status(400).json({ message: 'Invalid credentials' });
+        }
+
+        const user = results[0];
+        bcrypt.compare(password, user.password, (err, isMatch) => {
+          if (err) {
+            console.error('Bcrypt compare error:', err);
+            return res.status(500).json({ message: 'Server error during login' });
+          }
+
+          if (!isMatch) {
+            return res.status(400).json({ message: 'Invalid credentials' });
+          }
+
+          const { password: excludedPassword, ...userData } = user;
+          res.json({ message: 'Login successful', user: userData });
+        });
+      }
+    );
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ message: 'Server error during login' });
+  }
+});
+
+// Get all users
+app.get('/api/auth/users', (req, res) => {
+  db.query(
+    'SELECT id, username, email, phone, role, plant FROM users',
+    (error, results) => {
+      if (error) {
+        console.error('Database query error:', error);
+        return res.status(500).json({ message: 'Server error retrieving users' });
+      }
+      res.json(results);
+    }
+  );
+});
+
+// Update user
+app.put('/api/auth/users/:id', (req, res) => {
+  const { id } = req.params;
+  const { username, email, phone, role } = req.body;
+
+  db.query(
+    'UPDATE users SET username = ?, email = ?, phone = ?, role = ? WHERE id = ?',
+    [username, email, phone, role, id],
+    (error, results) => {
+      if (error) {
+        console.error('Database query error:', error);
+        return res.status(500).json({ message: 'Server error updating user' });
+      }
+      res.json({ message: 'User updated successfully' });
+    }
+  );
+});
+
+// Delete user
+app.delete('/api/auth/users/:id', (req, res) => {
+  const { id } = req.params;
+
+  db.query('DELETE FROM users WHERE id = ?', [id], (error, results) => {
+    if (error) {
+      console.error('Database query error:', error);
+      return res.status(500).json({ message: 'Server error deleting user' });
+    }
+    res.json({ message: 'User deleted successfully' });
+  });
+});
+
+// Cut-out item routes
+app.get('/api/items/cut-out/:bno', (req, res) => {
+  const { bno } = req.params;
+
+  db.query(
+    'SELECT * FROM cut_out WHERE bno = ?',
+    [bno],
+    (error, results) => {
+      if (error) {
+        return res.status(500).json({ error: error.message });
+      }
+
+      if (results.length > 0) {
+        res.json(results[0]);
+      } else {
+        res.status(404).json({ message: 'Item not found' });
+      }
+    }
+  );
+});
+
+
+app.get('/api/items/fg', (req, res) => {
+  const { plant } = req.query;
+
+  if (!plant) {
+    return res.status(400).json({ error: "Plant parameter is required" });
+  }
+
+  db.query(
+    'SELECT Id, bno, SO, Style, Style_Name, Cut_No, Colour, Size, BQty, Plant, Line, Damage_Pcs, Cut_Panel_Shortage, Good_Pcs, User, DATE(DateTime) AS Date FROM fg WHERE Plant = ? ORDER BY DateTime DESC;',
+    [plant],
+    (error, results) => {
+      if (error) {
+        return res.status(500).json({ error: error.message });
+      }
+      res.json(results);
+    }
+  );
+});
+
+app.get("/api/charts/all-data", (req, res) => {
+  const today = new Date().toISOString().split("T")[0]; // Format: YYYY-MM-DD
+  const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split("T")[0];
+  const last12Months = new Date(new Date().setMonth(new Date().getMonth() - 11)).toISOString().split("T")[0];
+
+  const query = `
+    SELECT
+      DATE_FORMAT(Date, '%Y-%m-%d') AS Date,  
+      Plant,
+      Style,
+      SUM(Good_Pcs) AS Good_Pcs,
+      SUM(Damage_Pcs) AS Damage_Pcs,
+      SUM(Cut_Panel_Shortage) AS Cut_Panel_Shortage,
+      MONTH(Date) AS Month,
+      YEAR(Date) AS Year
+    FROM fg
+    WHERE Date >= ?
+    GROUP BY Date, Plant, Style
+  `;
+
+  db.query(query, [last12Months], (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.json(results);
+  });
+});
+
+
+
+
+
+
+app.post('/api/items/addItem', (req, res) => {
+  const {
+    bno, SO, Style, Style_Name, Cut_No, Colour, Size, BQty,
+    Plant, Line, Damage_Pcs, Cut_Panel_Shortage, Good_Pcs, User
+  } = req.body;
+
+  // Check if the bno already exists in the fg table
+  const checkBnoSql = 'SELECT * FROM fg WHERE bno = ?';
+  
+  db.query(checkBnoSql, [bno], (error, result) => {
+    if (error) {
+      console.error('Database query error:', error);
+      return res.status(500).json({ error: 'Failed to check bno existence' });
+    }
+
+    if (result.length > 0) {
+      // If the bno exists, return an error message
+      return res.status(400).json({ error: 'BNo already exists in the fg table' });
+    } else {
+      // Proceed with inserting the new item since bno does not exist
+      const sql = `
+        INSERT INTO fg (
+          bno, SO, Style, Style_Name, Cut_No, Colour, Size, BQty,
+          Plant, Line, Damage_Pcs, Cut_Panel_Shortage, Good_Pcs,
+          DateTime, User, Year, Month, Subtraction
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, 
+          YEAR(CURRENT_DATE), MONTH(CURRENT_DATE), 0)
+      `;
+    
+      db.query(sql, [
+        bno, SO, Style, Style_Name, Cut_No, Colour, Size, BQty,
+        Plant, Line, Damage_Pcs, Cut_Panel_Shortage, Good_Pcs, User
+      ], (error, result) => {
+        if (error) {
+          console.error('Database insert error:', error);
+          return res.status(500).json({ error: 'Failed to add item' });
+        }
+        res.status(201).json({
+          message: 'Item added successfully',
+          data: result
+        });
+      });
+    }
+  });
+});
+
+
+
+
+// Helper functions
+function isStrongPassword(password) {
+  const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  return strongPasswordRegex.test(password);
+}
+
+function isValidEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+function isValidPhone(phone) {
+  const phoneRegex = /^\d{10}$/;
+  return phoneRegex.test(phone);
+}
+
+// Start server
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+
+});
