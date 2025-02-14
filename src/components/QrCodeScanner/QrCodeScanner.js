@@ -1,68 +1,60 @@
+// import "bootstrap/dist/css/bootstrap.min.css";
+// import "bootstrap/dist/js/bootstrap.bundle.min.js"; // For Bootstrap components like modals, tooltips, etc.
 // import jsQR from "jsqr";
-// import React, { useEffect, useState } from "react";
-// import "./QrCodeScanner.css";
+// import React, { useCallback, useRef, useState } from "react";
+
+
 
 // const QRCodeScanner = ({ onScanComplete, onClose }) => {
-//   const videoRef = React.useRef(null);
-//   const canvasRef = React.useRef(null);
+//   const videoRef = useRef(null);
+//   const canvasRef = useRef(null);
+//   const animationFrameRef = useRef(null);
 //   const [error, setError] = useState(null);
-//   const [isScannerRunning, setIsScannerRunning] = useState(false); // State to track if scanner is already running
 
+//   const stopCamera = useCallback(() => {
+//     if (videoRef.current && videoRef.current.srcObject) {
+//       const stream = videoRef.current.srcObject;
+//       const tracks = stream.getTracks();
+//       tracks.forEach(track => track.stop());
+//       videoRef.current.srcObject = null;
+//     }
+//     // Cancel any pending animation frame
+//     if (animationFrameRef.current) {
+//       cancelAnimationFrame(animationFrameRef.current);
+//       animationFrameRef.current = null;
+//     }
+//   }, []);
+  
 //   const startScanner = async () => {
-//     if (isScannerRunning) return; // Prevent starting the scanner if it's already running
-
 //     try {
 //       const stream = await navigator.mediaDevices.getUserMedia({
 //         video: { facingMode: "environment" },
 //       });
-
 //       const video = videoRef.current;
-//       if (video.srcObject) {
-//         video.srcObject.getTracks().forEach(track => track.stop());
-//       }
-
 //       video.srcObject = stream;
 //       video.setAttribute("playsinline", true);
 //       video.play();
-//       setIsScannerRunning(true); // Mark the scanner as running
-//       requestAnimationFrame(scanQRCode);
+//       scanQRCode();
 //     } catch (err) {
 //       console.error("Error accessing camera:", err);
 //       setError("Camera access denied. Please enable camera permissions.");
 //     }
 //   };
-
-//   const stopCamera = () => {
-//     if (videoRef.current && videoRef.current.srcObject) {
-//       const stream = videoRef.current.srcObject;
-//       const tracks = stream.getTracks();
-//       tracks.forEach(track => track.stop()); // Stop each track
-//       videoRef.current.srcObject = null; // Clear the video source
-//       setIsScannerRunning(false); // Reset scanner status
-//     }
-//   };
-
+  
 //   const handleCloseScanner = () => {
-//     stopCamera();  // Stop the camera
-//     onClose();  // Close the scanner UI
-//     window.close();  // Close the window/tab
+//     stopCamera();
+//     onClose();
 //   };
-
-//   const scanQRCode = () => {
+  
+//   const scanQRCode = useCallback(() => {
 //     const video = videoRef.current;
 //     const canvas = canvasRef.current;
-
-//     if (!canvas) {
-//       console.error("Canvas not found");
-//       return; // Exit if canvas is not available
-//     }
+    
+//     // Check if video or canvas are null before proceeding
+//     if (!video || !canvas) return;
 
 //     const context = canvas.getContext("2d");
-//     if (!context) {
-//       console.error("Failed to get canvas context");
-//       return; // Exit if canvas context is not available
-//     }
-
+    
 //     if (video.readyState === video.HAVE_ENOUGH_DATA) {
 //       canvas.height = video.videoHeight;
 //       canvas.width = video.videoWidth;
@@ -75,52 +67,64 @@
 //         const scannedBNumber = code.data;
 //         console.log("Scanned BNumber:", scannedBNumber);
 
-//         // Call onScanComplete with the scanned bNumber
 //         onScanComplete(scannedBNumber);
-
-//         // Stop video stream
-//         video.srcObject.getTracks().forEach((track) => track.stop());
+//         stopCamera();
 //         return;
 //       }
 //     }
-//     requestAnimationFrame(scanQRCode);
-//   };
+    
+//     // Only request next animation frame if not already stopped
+//     animationFrameRef.current = requestAnimationFrame(scanQRCode);
+//   }, [onScanComplete, stopCamera]);
 
-//   // Start the scanner when the component mounts
-//   useEffect(() => {
-//     startScanner();
+//   // Cleanup on unmount
+//   React.useEffect(() => {
 //     return () => {
-//       stopCamera(); // Cleanup and stop camera when component unmounts
+//       stopCamera();
 //     };
-//   }, []); // Empty dependency array means this effect runs only once when the component mounts
+//   }, [stopCamera]);
 
 //   return (
-//     <div className="dialog-container">
-//       {error && <p className="error-message">{error}</p>}
-//       <div className="scanner-container">
-//         <video ref={videoRef} style={{ width: "100%", maxHeight: "300px" }}></video>
-//       </div>
-//       <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
-//       <button onClick={handleCloseScanner} className="close-scanner-btn">Close Scanner</button>
+//     <div className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-75 d-flex flex-column justify-content-center align-items-center" style={{ zIndex: 1050 }}>
+//     {error && <p className="error-message text-danger mb-3">{error}</p>}
+//     <div className="scanner-container w-40 max-w-400px bg-white rounded-3 p-4 shadow-sm text-center">
+//       <video
+//         ref={videoRef}
+//         className="w-100 rounded-2 mb-3v"
+//         style={{ maxHeight: "300px", objectFit: "cover" }}
+//       ></video>
 //     </div>
+//     <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
+//     <div className="d-flex gap-2 p-3">
+//       <button onClick={startScanner} className="btn btn-primary flex-grow-1">
+//         Start Scanner
+//       </button>
+//       <button onClick={handleCloseScanner} className="btn btn-danger flex-grow-1">
+//         Close Scanner
+//       </button>
+//     </div>
+//   </div>
+  
 //   );
 // };
 
 // export default QRCodeScanner;
 
 
+
 import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap/dist/js/bootstrap.bundle.min.js"; // For Bootstrap components like modals, tooltips, etc.
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import jsQR from "jsqr";
 import React, { useCallback, useRef, useState } from "react";
-
-
+import { Camera, X, QrCode, RefreshCw } from "lucide-react";
 
 const QRCodeScanner = ({ onScanComplete, onClose }) => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const animationFrameRef = useRef(null);
   const [error, setError] = useState(null);
+  const [isScanning, setIsScanning] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const stopCamera = useCallback(() => {
     if (videoRef.current && videoRef.current.srcObject) {
@@ -129,39 +133,59 @@ const QRCodeScanner = ({ onScanComplete, onClose }) => {
       tracks.forEach(track => track.stop());
       videoRef.current.srcObject = null;
     }
-    // Cancel any pending animation frame
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
     }
+    setIsScanning(false);
   }, []);
-  
+
   const startScanner = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
-      });
-      const video = videoRef.current;
-      video.srcObject = stream;
-      video.setAttribute("playsinline", true);
-      video.play();
-      scanQRCode();
+      const constraints = {
+        video: { 
+          facingMode: "environment",
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
+      };
+      
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.setAttribute("playsinline", true); // important for iOS
+        
+        // Wait for video to be ready
+        await new Promise((resolve) => {
+          videoRef.current.onloadedmetadata = () => {
+            resolve();
+          };
+        });
+        
+        await videoRef.current.play();
+        setIsScanning(true);
+        scanQRCode();
+      }
     } catch (err) {
       console.error("Error accessing camera:", err);
-      setError("Camera access denied. Please enable camera permissions.");
+      setError("Camera access denied. Please enable camera permissions and ensure no other app is using the camera.");
+    } finally {
+      setLoading(false);
     }
   };
-  
+
   const handleCloseScanner = () => {
     stopCamera();
     onClose();
   };
-  
+
   const scanQRCode = useCallback(() => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
     
-    // Check if video or canvas are null before proceeding
     if (!video || !canvas) return;
 
     const context = canvas.getContext("2d");
@@ -177,45 +201,145 @@ const QRCodeScanner = ({ onScanComplete, onClose }) => {
       if (code) {
         const scannedBNumber = code.data;
         console.log("Scanned BNumber:", scannedBNumber);
-
         onScanComplete(scannedBNumber);
-        stopCamera();
+        stopCamera(); // Stop camera immediately after scanning
         return;
       }
     }
     
-    // Only request next animation frame if not already stopped
     animationFrameRef.current = requestAnimationFrame(scanQRCode);
   }, [onScanComplete, stopCamera]);
 
+  // Start camera automatically when component mounts
   // Cleanup on unmount
   React.useEffect(() => {
     return () => {
       stopCamera();
     };
-  }, [stopCamera]);
+  }, [stopCamera]); // Empty dependency array means this runs once on mount
+
+  // Add a retry button functionality
+  const handleRetry = () => {
+    stopCamera();
+    startScanner();
+  };
 
   return (
-    <div className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-75 d-flex flex-column justify-content-center align-items-center" style={{ zIndex: 1050 }}>
-    {error && <p className="error-message text-danger mb-3">{error}</p>}
-    <div className="scanner-container w-40 max-w-400px bg-white rounded-3 p-4 shadow-sm text-center">
-      <video
-        ref={videoRef}
-        className="w-100 rounded-2 mb-3v"
-        style={{ maxHeight: "300px", objectFit: "cover" }}
-      ></video>
+    <div className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center" 
+         style={{ 
+           zIndex: 1050,
+           backgroundColor: 'rgba(0, 0, 0, 0.85)'
+         }}>
+      <div className="container px-4">
+        <div className="row justify-content-center">
+          <div className="col-12 col-md-8 col-lg-6">
+            <div className="card border-0 shadow-lg">
+              <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3">
+                <div className="d-flex align-items-center">
+                  <QrCode size={24} className="me-2" />
+                  <h5 className="mb-0">QR Code Scanner</h5>
+                </div>
+                <button 
+                  className="btn btn-link text-white p-0" 
+                  onClick={handleCloseScanner}
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              <div className="card-body p-4">
+                {error && (
+                  <div className="alert alert-danger d-flex align-items-center mb-3" role="alert">
+                    <X size={20} className="me-2" />
+                    <div>
+                      {error}
+                      <button 
+                        className="btn btn-link text-danger p-0 ms-2" 
+                        onClick={handleRetry}
+                      >
+                        Retry
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <div className="position-relative mb-4" style={{ minHeight: "300px" }}>
+                  {loading && (
+                    <div className="position-absolute top-0 start-0 w-100 h-100 bg-light d-flex flex-column justify-content-center align-items-center rounded">
+                      <div className="spinner-border text-primary mb-3" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                      </div>
+                      <p className="text-muted mb-0">Initializing camera...</p>
+                    </div>
+                  )}
+                  
+                  <video
+                    ref={videoRef}
+                    className="w-100 h-100 rounded"
+                    style={{ 
+                      objectFit: "cover",
+                      display: isScanning ? "block" : "none",
+                      minHeight: "300px"
+                    }}
+                    playsInline
+                  />
+
+                  
+                </div>
+
+                <canvas ref={canvasRef} style={{ display: "none" }} />
+
+                <div className="d-grid gap-2">
+                  {!isScanning ? (
+                    <button 
+                      onClick={startScanner} 
+                      className="btn btn-primary btn-lg d-flex align-items-center justify-content-center gap-2"
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <>
+                          <RefreshCw size={20} className="spinner-border spinner-border-sm" />
+                          Initializing Camera...
+                        </>
+                      ) : (
+                        <>
+                          <Camera size={20} />
+                          Start Scanner
+                        </>
+                      )}
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={stopCamera} 
+                      className="btn btn-danger btn-lg d-flex align-items-center justify-content-center gap-2"
+                    >
+                      <X size={20} />
+                      Stop Scanner
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <style>
+        {`
+          @keyframes scan {
+            0% {
+              top: 0;
+            }
+            50% {
+              top: 100%;
+            }
+            100% {
+              top: 0;
+            }
+          }
+        `}
+      </style>
     </div>
-    <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
-    <div className="d-flex gap-2 p-3">
-      <button onClick={startScanner} className="btn btn-primary flex-grow-1">
-        Start Scanner
-      </button>
-      <button onClick={handleCloseScanner} className="btn btn-danger flex-grow-1">
-        Close Scanner
-      </button>
-    </div>
-  </div>
-  
   );
 };
 

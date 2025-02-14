@@ -5,6 +5,7 @@ import { Alert, Button, Col, Container, Modal, Row, Table } from 'react-bootstra
 function ManageAllUsers() {
   const [companyAdmins, setCompanyAdmins] = useState([]);
   const [plantUsers, setPlantUsers] = useState([]);
+  const [cutinUsers, setCutinUsers] = useState([]);
   const [error, setError] = useState("");
   const [deleteModal, setDeleteModal] = useState({ 
     show: false, 
@@ -24,8 +25,10 @@ function ManageAllUsers() {
   .then((data) => {
     const admins = data.filter((user) => user.role === "company admin");
     const plantUsers = data.filter((user) => user.role === "plant user");
+    const cutinUsers = data.filter((user) => user.role === "cut in");
     setCompanyAdmins(admins);
     setPlantUsers(plantUsers);
+    setCutinUsers(cutinUsers);
   })
   .catch(() => {
     setError("Failed to fetch users");
@@ -55,8 +58,11 @@ function ManageAllUsers() {
         }
         if (userType === "company admin") {
           setCompanyAdmins(companyAdmins.filter((user) => user.id !== userId));
-        } else {
+        } else if (userType === "plant user") {
           setPlantUsers(plantUsers.filter((user) => user.id !== userId));
+        }
+        else{
+          setCutinUsers(cutinUsers.filter((user) => user.id !== userId));
         }
         // Close the modal after successful deletion
         setDeleteModal({ show: false, userId: null, userType: "" });
@@ -157,7 +163,48 @@ function ManageAllUsers() {
             </Table>
           </div>
         </Col>
+
       </Row>
+      <Row className="justify-content-center">
+      <Col md={6}>
+          <div 
+            className="bg-white rounded shadow-lg p-4 mb-4"
+            style={{ backgroundColor: 'rgba(255,255,255,0.9)' }}
+          >
+            <h3 className="text-center text-primary mb-4">Cut In Users</h3>
+            <Table striped bordered hover responsive>
+              <thead className="table-dark">
+                <tr>
+                  <th>Username</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cutinUsers.map((user) => (
+                  <tr key={user.id}>
+                    <td>{user.username}</td>
+                    <td>{user.email}</td>
+                    <td>{user.phone}</td>
+                    <td>
+                      <Button 
+                        variant="danger" 
+                        size="sm" 
+                        onClick={() => handleDelete(user.id, "company admin")}
+                      >
+                        Delete
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+        </Col>
+
+      </Row>
+      
 
       <Modal show={deleteModal.show} onHide={() => setDeleteModal({ show: false, user: null, type: '' })}>
         <Modal.Header closeButton>

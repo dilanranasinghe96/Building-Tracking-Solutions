@@ -200,7 +200,7 @@ const containerStyle = {
   };
 
   const cardStyle = {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: '#fffed9 ',
     borderRadius: '15px',
     boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
     border: 'none',
@@ -213,8 +213,19 @@ const containerStyle = {
   };
 
   if (loading) {
-    return <div className="container mt-4">Loading dashboard...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-center">
+          <div className="d-flex justify-content-center align-items-center" style={{ height: "100vh" }}>
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Loading...</span>              
+            </div>            
+          </div>         
+        </div>
+      </div>
+    );
   }
+  
 
   const todayData = getTodayProduction();
   const styleData = getStyleDistribution();
@@ -243,11 +254,15 @@ const containerStyle = {
                     <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
                     <XAxis dataKey="plant" />
                     <YAxis />
-                    <Tooltip />
+                    <Tooltip  contentStyle={{
+                          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                          borderRadius: '8px',
+                          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
+                        }}/>
                     <Legend />
                     <Bar
                         dataKey="goodPcs"                
-                        fill="#0088FE"
+                        fill="#4cc200"
                         name="Good Pieces"
                         radius={[4, 4, 0, 0]}
                       />
@@ -279,7 +294,12 @@ const containerStyle = {
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip />
+                    <Tooltip 
+                     contentStyle={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
+                    }}/>
                     <Legend />
                   </PieChart>
                 </ResponsiveContainer>
@@ -308,9 +328,13 @@ const containerStyle = {
                       height={70}
                     />
                     <YAxis />
-                    <Tooltip />
+                    <Tooltip  contentStyle={{
+                          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                          borderRadius: '8px',
+                          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
+                        }}/>
                     <Legend />
-                    <Line type="monotone" dataKey="totalGoodPcs" stroke="#0088FE" dot={false} name="Total Good Pieces" />
+                    <Line type="monotone" dataKey="totalGoodPcs" stroke="#5d00ff" dot={true} name="Total Good Pieces" strokeWidth={3}/>
 
                   </LineChart>
                 </ResponsiveContainer>
@@ -344,9 +368,13 @@ const containerStyle = {
                   height={70}
                 />
                 <YAxis />
-                <Tooltip />
+                <Tooltip  contentStyle={{
+                          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                          borderRadius: '8px',
+                          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
+                        }}/>
                 <Legend />
-                <Line type="monotone" dataKey="goodPcs" stroke="#0088FE" dot={false} name="Good Pieces" />
+                <Line type="monotone" dataKey="goodPcs" stroke="#d800ff" dot={true} name="Good Pieces" strokeWidth={3}/>
               </LineChart>
             </ResponsiveContainer>
                 </div>
@@ -393,7 +421,7 @@ const containerStyle = {
                         stroke="#FF0000"
                         strokeWidth={3}
                         name="Damage Pieces"
-                        dot={false}
+                        dot={true}
                       />
                       <Line
                         type="monotone"
@@ -401,7 +429,7 @@ const containerStyle = {
                         stroke="#FFA500"
                         strokeWidth={3}
                         name="Cut Panel Shortage"
-                        dot={false}
+                        dot={true}
                       />
                     </LineChart>
                   </ResponsiveContainer>

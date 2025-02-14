@@ -2,6 +2,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
 import React from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import Footer from "./components/Footer/Footer";
 import PrivateRoute from "./components/PrivateRoute/PrivateRoute";
 import Navbar from "./components/navbar/Navbar";
 import CompanyAdminPage from "./pages/CompanyAdmin/CadminDashboard";
@@ -12,6 +13,8 @@ import LoginPage from "./pages/LoginPage/LoginPage";
 import CreateAllUsers from "./pages/MainAdmin/CreateAllUsers";
 import MainAdminPage from "./pages/MainAdmin/MainAdminPage";
 import ManageAllUsers from "./pages/MainAdmin/ManageAllUsers";
+import RegisterPage from "./pages/RegisterPage/RegisterPage";
+import CutInTag from "./pages/CutInTag/CutInTag";
 
 
 function App() {
@@ -27,11 +30,11 @@ function App() {
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<LoginPage />} />
-          {/* <Route path="/register" element={<RegisterPage />} /> */}
+          <Route path="/register" element={<RegisterPage />} />
           <Route path="/login" element={<LoginPage />} />
 
           {/* Protected routes */}
-          <Route element={<PrivateRoute allowedRoles={["plant user", "user"]} />}>
+          <Route element={<PrivateRoute allowedRoles={["plant user", "company admin"]} />}>
             <Route path="/home" element={<HomePage />} />
           </Route>
 
@@ -47,8 +50,13 @@ function App() {
             <Route path="/createallusers" element={<CreateAllUsers />} />
 
           </Route>
+          <Route element={<PrivateRoute allowedRoles={["cut in"]} />}>
+            <Route path="/cutintag" element={<CutInTag />} />
+           
+          </Route>
 
         </Routes>
+        <Footer/>
       </div>
     </Router>
   );

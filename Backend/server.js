@@ -4,7 +4,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import rateLimit from "express-rate-limit";
-import mysql from "mysql2";
+import mysql from "mysql";
 
 // Load environment variables
 dotenv.config();
@@ -225,24 +225,29 @@ app.get('/api/items/cut-out/:bno', (req, res) => {
 });
 
 
+
+
 app.get('/api/items/fg', (req, res) => {
   const { plant } = req.query;
+  let query;
+  let params = [];
 
-  if (!plant) {
-    return res.status(400).json({ error: "Plant parameter is required" });
+  if (plant) {
+    query = 'SELECT Id, bno, SO, Style, Style_Name, Cut_No, Colour, Size, BQty, Plant, Line, Damage_Pcs, Cut_Panel_Shortage, Good_Pcs, User, DATE(DateTime) AS Date FROM fg WHERE Plant = ? ORDER BY DateTime DESC;';
+    params = [plant];
+  } else {
+    // Allow fetching all records when no plant is specified
+    query = 'SELECT Id, bno, SO, Style, Style_Name, Cut_No, Colour, Size, BQty, Plant, Line, Damage_Pcs, Cut_Panel_Shortage, Good_Pcs, User, DATE(DateTime) AS Date FROM fg ORDER BY DateTime DESC;';
   }
 
-  db.query(
-    'SELECT Id, bno, SO, Style, Style_Name, Cut_No, Colour, Size, BQty, Plant, Line, Damage_Pcs, Cut_Panel_Shortage, Good_Pcs, User, DATE(DateTime) AS Date FROM fg WHERE Plant = ? ORDER BY DateTime DESC;',
-    [plant],
-    (error, results) => {
-      if (error) {
-        return res.status(500).json({ error: error.message });
-      }
-      res.json(results);
+  db.query(query, params, (error, results) => {
+    if (error) {
+      return res.status(500).json({ error: error.message });
     }
-  );
+    res.json(results);
+  });
 });
+
 
 app.get("/api/charts/all-data", (req, res) => {
   const today = new Date().toISOString().split("T")[0]; // Format: YYYY-MM-DD
@@ -323,6 +328,55 @@ app.post('/api/items/addItem', (req, res) => {
     }
   });
 });
+
+
+
+
+app.get('/api/so-list', (req, res) => {
+  db.query('SELECT DISTINCT SO FROM cut_in', (error, results) => {
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.json(results);
+  });
+});
+
+
+app.get('/api/cut-no-list', (req, res) => {
+  const { SO } = req.query;
+  
+  if (!SO) {
+    return res.status(400).json({ message: 'SO is required' });
+  }
+
+  db.query('SELECT DISTINCT Cut_No FROM cut_in WHERE SO = ?', [SO], (error, results) => {
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.json(results);
+  });
+});
+
+
+app.get('/api/items/cut-in', (req, res) => {
+  const { SO, Cut_No } = req.query;
+
+  if (!SO || !Cut_No) {
+    return res.status(400).json({ message: 'SO and Cut_No are required' });
+  }
+
+  db.query(
+    'SELECT * FROM cut_in WHERE SO = ? AND Cut_No = ?', 
+    [SO, Cut_No], 
+    (error, results) => {
+      if (error) {
+        return res.status(500).json({ error: error.message });
+      }
+      res.json(results.length > 0 ? results : { message: 'No data found' });
+    }
+  );
+});
+
 
 
 

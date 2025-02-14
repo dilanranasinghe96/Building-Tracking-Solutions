@@ -1,85 +1,3 @@
-
-
-
-// import axios from "axios";
-// import React, { useEffect, useState } from "react";
-
-// const TableDisplay = () => {
-//   const [items, setItems] = useState([]);
-  
-//   useEffect(() => {
-//     const user = JSON.parse(localStorage.getItem("user"));
-//     const userPlant = user?.plant;
-
-//     axios
-//       .get("http://localhost:3000/api/items/fg", {
-//         params: { plant: userPlant }, // Pass plant as a query parameter
-//       })
-//       .then((response) => {
-//         setItems(response.data);
-//       })
-//       .catch((error) => {
-//         console.error("Error fetching data:", error);
-//       });
-//   }, []);
-
-//   return (
-//     <div className="table-responsive" style={{ maxHeight: "500px", overflowY: "auto" }}>
-//       <table className="table table-bordered table-striped">
-//         <thead className="table-dark sticky-top">
-//           <tr>
-//             <th>BNo</th>
-//             <th>SO</th>
-//             <th>Style</th>
-//             <th>Style Name</th>
-//             <th>Cut No</th>
-//             <th>Colour</th>
-//             <th>Size</th>
-//             <th>BQty</th>
-//             <th>Plant</th>
-//             <th>Line</th>
-//             <th>Damage Pcs</th>
-//             <th>Cut Panel Shortage</th>
-//             <th>Good Pcs</th>
-//             <th>User</th>
-//             <th>Date</th>
-//           </tr>
-//         </thead>
-//         <tbody>
-//           {items.map((item) => (
-//             <tr key={item.Id}>
-//               <td>{item.bno}</td>
-//               <td>{item.SO}</td>
-//               <td>{item.Style}</td>
-//               <td>{item.Style_Name}</td>
-//               <td>{item.Cut_No}</td>
-//               <td>{item.Colour}</td>
-//               <td>{item.Size}</td>
-//               <td>{item.BQty}</td>
-//               <td>{item.Plant}</td>
-//               <td>{item.Line}</td>
-//               <td>{item.Damage_Pcs}</td>
-//               <td>{item.Cut_Panel_Shortage}</td>
-//               <td>{item.Good_Pcs}</td>
-//               <td>{item.User}</td>
-              // <td>
-                // {(() => {
-                //   const originalDate = new Date(item.Date);
-                //   originalDate.setDate(originalDate.getDate() + 1); // Adjust date
-                //   return originalDate.toISOString().split("T")[0];
-                // })()}
-              // </td>
-//             </tr>
-//           ))}
-//         </tbody>
-//       </table>
-//     </div>
-//   );
-// };
-
-// export default TableDisplay;
-
-
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React, { useEffect, useMemo, useState } from "react";
 import { Button, Container } from 'react-bootstrap';
@@ -93,10 +11,25 @@ import {
 const TableDisplay = () => {
   const [items, setItems] = useState([]);
   
+
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
     const userPlant = user?.plant;
-  
+    const userRole = user?.role;
+    
+    userRole === "company admin" ? fetch(`http://localhost:8081/api/items/fg`).then((response) => {
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      setItems(data);
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    }) :
+
     fetch(`http://localhost:8081/api/items/fg?plant=${encodeURIComponent(userPlant)}`)
       .then((response) => {
         if (!response.ok) {

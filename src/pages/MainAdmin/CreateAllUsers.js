@@ -1,7 +1,9 @@
 
+import { Building, Eye, EyeOff, Lock, Mail, Phone, User, Users } from 'lucide-react';
 import React, { useState } from "react";
 import { Alert, Button, Container, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+
 
 function CreateAllUsers() {
   const [username, setUsername] = useState("");
@@ -13,6 +15,10 @@ function CreateAllUsers() {
   const [plant, setPlant] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
 
   const validateForm = () => {
     if (password !== confirmPassword) {
@@ -38,6 +44,14 @@ function CreateAllUsers() {
     return true;
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+
  const handleRegister = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -60,7 +74,10 @@ function CreateAllUsers() {
       const data = await response.json();
   
       if (response.ok && data.message === "User registered successfully") {
-        navigate("/ManageAllUsers");
+        setShowSuccessAlert(true);
+        setTimeout(() => {
+          navigate("/ManageAllUsers");         
+        }, 1500);
       } else {
         setError(data.message || "Registration failed");
       }
@@ -90,51 +107,152 @@ function CreateAllUsers() {
         <h2 className="text-center text-primary mb-4">Register Users</h2>
         {error && <Alert variant="danger">{error}</Alert>}
         <Form onSubmit={handleRegister}>
-          <Form.Group controlId="username">
-            <Form.Label>Username</Form.Label>
-            <Form.Control type="text" placeholder="Enter username" value={username} onChange={(e) => setUsername(e.target.value)} required className="mb-3" />
-          </Form.Group>
-          <Form.Group controlId="email">
-            <Form.Label>Email</Form.Label>
-            <Form.Control type="email" placeholder="Enter email" value={email} onChange={(e) => setEmail(e.target.value)} required className="mb-3" />
-          </Form.Group>
-          <Form.Group controlId="password">
-            <Form.Label>Password</Form.Label>
-            <Form.Control type="password" placeholder="Enter password" value={password} onChange={(e) => setPassword(e.target.value)} required className="mb-3" />
-          </Form.Group>
-          <Form.Group controlId="confirmPassword">
-            <Form.Label>Confirm Password</Form.Label>
-            <Form.Control type="password" placeholder="Confirm password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="mb-3" />
-          </Form.Group>
-          <Form.Group controlId="phone">
-            <Form.Label>Phone Number</Form.Label>
-            <Form.Control type="tel" placeholder="Enter phone number" value={phone} onChange={(e) => setPhone(e.target.value)} required className="mb-3" />
-          </Form.Group>
-          <Form.Group controlId="role">
-            <Form.Label>Role</Form.Label>
-            <Form.Control as="select" value={role} onChange={(e) => setRole(e.target.value)} required className="mb-3">
-              <option value="">Select Role</option>
-              <option value="company admin">Company Admin</option>
-              <option value="plant user">Plant User</option>
-              
-            </Form.Control>
-          </Form.Group>
-          {role === "plant user" && (
-            <Form.Group controlId="plant">
-              <Form.Label>Plant</Form.Label>
-              <Form.Control as="select" value={plant} onChange={(e) => setPlant(e.target.value)} required className="mb-3">
-                <option value="">Select Plant</option>
-                <option value="CTM-D">CTM-D</option>
-                <option value="CTM-P">CTM-P</option>
-                <option value="CTM-M">CTM-M</option>
-              </Form.Control>
+            <Form.Group controlId="username">
+              <Form.Label>Username</Form.Label>
+              <div className="input-group mb-3">
+                <span className="input-group-text">
+                  <User size={20} />
+                </span>
+                <Form.Control 
+                  type="text" 
+                  placeholder="Enter username" 
+                  value={username} 
+                  onChange={(e) => setUsername(e.target.value)} 
+                  required 
+                />
+              </div>
             </Form.Group>
-          )}
-          <Button variant="primary" type="submit" className="w-100 py-2 mb-3">Register</Button>
-        </Form>
+
+            <Form.Group controlId="email">
+              <Form.Label>Email</Form.Label>
+              <div className="input-group mb-3">
+                <span className="input-group-text">
+                  <Mail size={20} />
+                </span>
+                <Form.Control 
+                  type="email" 
+                  placeholder="Enter email" 
+                  value={email} 
+                  onChange={(e) => setEmail(e.target.value)} 
+                  required 
+                />
+              </div>
+            </Form.Group>
+
+            <Form.Group controlId="password">
+              <Form.Label>Password</Form.Label>
+              <div className="input-group mb-3">
+                <span className="input-group-text">
+                  <Lock size={20} />
+                </span>
+                <Form.Control 
+                  type={showPassword ? "text" : "password"} 
+                  placeholder="Enter password" 
+                  value={password} 
+                  onChange={(e) => setPassword(e.target.value)} 
+                  required 
+                />
+                <button
+                  type="button"
+                  className="input-group-text"
+                  onClick={togglePasswordVisibility}
+                  style={{ cursor: 'pointer' }}
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+            </Form.Group>
+
+            <Form.Group controlId="confirmPassword">
+              <Form.Label>Confirm Password</Form.Label>
+              <div className="input-group mb-3">
+                <span className="input-group-text">
+                  <Lock size={20} />
+                </span>
+                <Form.Control 
+                  type={showConfirmPassword ? "text" : "password"} 
+                  placeholder="Confirm password" 
+                  value={confirmPassword} 
+                  onChange={(e) => setConfirmPassword(e.target.value)} 
+                  required 
+                />
+                <button
+                  type="button"
+                  className="input-group-text"
+                  onClick={toggleConfirmPasswordVisibility}
+                  style={{ cursor: 'pointer' }}
+                >
+                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+            </Form.Group>
+
+            <Form.Group controlId="phone">
+              <Form.Label>Phone Number</Form.Label>
+              <div className="input-group mb-3">
+                <span className="input-group-text">
+                  <Phone size={20} />
+                </span>
+                <Form.Control 
+                  type="tel" 
+                  placeholder="Enter phone number" 
+                  value={phone} 
+                  onChange={(e) => setPhone(e.target.value)} 
+                  required 
+                />
+              </div>
+            </Form.Group>
+
+            <Form.Group controlId="role">
+              <Form.Label>Role</Form.Label>
+              <div className="input-group mb-3">
+                <span className="input-group-text">
+                  <Users size={20} />
+                </span>
+                <Form.Control 
+                  as="select" 
+                  value={role} 
+                  onChange={(e) => setRole(e.target.value)} 
+                  required
+                >
+                  <option value="">Select Role</option>
+                  <option value="company admin">Company Admin</option>
+                  <option value="plant user">Plant User</option>
+                  <option value="cut in">Cut In</option>
+                </Form.Control>
+              </div>
+            </Form.Group>
+
+            {role === "plant user" && (
+              <Form.Group controlId="plant">
+                <Form.Label>Plant</Form.Label>
+                <div className="input-group mb-3">
+                  <span className="input-group-text">
+                    <Building size={20} />
+                  </span>
+                  <Form.Control 
+                    as="select" 
+                    value={plant} 
+                    onChange={(e) => setPlant(e.target.value)} 
+                    required
+                  >
+                    <option value="">Select Plant</option>
+                    <option value="CTM-D">CTM-D</option>
+                    <option value="CTM-P">CTM-P</option>
+                    <option value="CTM-M">CTM-M</option>
+                  </Form.Control>
+                </div>
+              </Form.Group>
+            )}
+
+            <Button variant="primary" type="submit" className="w-100 py-2 mb-3">Register</Button>
+          </Form>
       </div>
     </Container>
-
+          {/* Success Alert */}
+       <Alert show={showSuccessAlert} variant="success" className="position-absolute top-50 start-50 translate-middle">
+        User created successfully
+      </Alert>
 
     </div>
     
