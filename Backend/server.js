@@ -17,6 +17,7 @@ const port = 8081;
 app.use(cors());
 app.use(express.json());
 
+
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // Limit each IP to 100 requests per windowMs
@@ -375,6 +376,46 @@ app.get('/api/items/cut-in', (req, res) => {
       res.json(results.length > 0 ? results : { message: 'No data found' });
     }
   );
+});
+
+//insert data to print ststus table
+app.post('/api/store-print-status', (req, res) => {
+  const { SO, Cut_No } = req.body;
+
+  const query = `
+      INSERT INTO print_status (SO, Cut_No, status)
+      VALUES (?, ?, 'printed')
+      ON DUPLICATE KEY UPDATE status = 'printed';
+  `;
+
+  db.query(query, [SO, Cut_No], (err, result) => {
+      if (err) {
+          console.error("Error storing print status:", err);
+          return res.status(500).json({ error: "Database error" });
+      }
+      res.json({ message: "Print status stored successfully" });
+  });
+});
+
+
+//get data from print status table to check printed or not
+app.get('/api/check-print-status', (req, res) => {
+  const { SO, Cut_No } = req.query;
+
+  const query = `SELECT status FROM print_status WHERE SO = ? AND Cut_No = ?`;
+
+  db.query(query, [SO, Cut_No], (err, results) => {
+      if (err) {
+          console.error("Error checking print status:", err);
+          return res.status(500).json({ error: "Database error" });
+      }
+
+      if (results.length > 0) {
+          res.json({ status: results[0].status });
+      } else {
+          res.json({ status: "not printed" });
+      }
+  });
 });
 
 

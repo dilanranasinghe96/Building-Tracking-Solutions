@@ -8,13 +8,14 @@ import Navbar from "./components/navbar/Navbar";
 import CompanyAdminPage from "./pages/CompanyAdmin/CadminDashboard";
 import CreatePlantUsers from "./pages/CompanyAdmin/Users/CreatePlantUsers";
 import ManagePlantUsers from "./pages/CompanyAdmin/Users/ManagePlantUsers";
+import CutInTag from "./pages/CutInTag/CutInTag";
 import HomePage from "./pages/HomePage/HomePage";
 import LoginPage from "./pages/LoginPage/LoginPage";
 import CreateAllUsers from "./pages/MainAdmin/CreateAllUsers";
 import MainAdminPage from "./pages/MainAdmin/MainAdminPage";
 import ManageAllUsers from "./pages/MainAdmin/ManageAllUsers";
 import RegisterPage from "./pages/RegisterPage/RegisterPage";
-import CutInTag from "./pages/CutInTag/CutInTag";
+import AutoLogout from "./components/AutoLogout/AutoLogout";
 
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
     <Router>
       
       <div className="App" >
+      <AutoLogout />
         <Navbar/>
     
         <Routes>

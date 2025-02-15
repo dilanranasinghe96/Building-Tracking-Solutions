@@ -10,6 +10,9 @@ import {
 
 const TableDisplay = () => {
   const [items, setItems] = useState([]);
+
+  const BASE_URL = process.env.REACT_APP_BASE_URL;
+
   
 
   useEffect(() => {
@@ -17,7 +20,7 @@ const TableDisplay = () => {
     const userPlant = user?.plant;
     const userRole = user?.role;
     
-    userRole === "company admin" ? fetch(`http://localhost:8081/api/items/fg`).then((response) => {
+    userRole === "company admin" ? fetch(`${BASE_URL}/api/items/fg`).then((response) => {
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
@@ -30,7 +33,7 @@ const TableDisplay = () => {
       console.error("Error fetching data:", error);
     }) :
 
-    fetch(`http://localhost:8081/api/items/fg?plant=${encodeURIComponent(userPlant)}`)
+    fetch(`${BASE_URL}/api/items/fg?plant=${encodeURIComponent(userPlant)}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Failed to fetch data");
@@ -43,7 +46,7 @@ const TableDisplay = () => {
       .catch((error) => {
         console.error("Error fetching data:", error);
       });
-  }, []);
+  }, [BASE_URL]);
   
 
   const columns = useMemo(

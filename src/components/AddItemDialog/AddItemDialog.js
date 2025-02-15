@@ -13,13 +13,16 @@ const AddItemDialog = ({ onClose, bNumber }) => {
   const [showCloseModal, setShowCloseModal] = useState(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
 
+  const BASE_URL = process.env.REACT_APP_BASE_URL;
+
+
   // Fetch user data from local storage
   const user = JSON.parse(localStorage.getItem("user"));
   const userPlant = user?.plant;
 
   useEffect(() => {
     if (bNumber) {
-      fetch(`http://localhost:8081/api/items/cut-out/${bNumber}`)
+      fetch(`${BASE_URL}/api/items/cut-out/${bNumber}`)
         .then((response) => {
           if (!response.ok) {
             throw new Error("Failed to fetch item details");
@@ -46,7 +49,8 @@ const AddItemDialog = ({ onClose, bNumber }) => {
           setTimeout(() => setErrorMessage(""), 3000);
         });
     }
-  }, [bNumber, userPlant, onClose]);
+    
+  }, [bNumber, userPlant, onClose,BASE_URL]);
 
 
   useEffect(() => {
@@ -101,7 +105,7 @@ const AddItemDialog = ({ onClose, bNumber }) => {
     //   User: user.username,
     // };
 
-    fetch("http://localhost:8081/api/items/addItem", {
+    fetch(`${BASE_URL}/api/items/addItem`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newItem),
@@ -117,7 +121,7 @@ const AddItemDialog = ({ onClose, bNumber }) => {
         setIsDirty(false);
         setShowSuccessAlert(true);
         setTimeout(() => {
-          navigate("/CadminDashboard");
+          navigate("/home");
           onClose();
         }, 1500);
       })

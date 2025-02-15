@@ -366,6 +366,9 @@ const ManualAddItems = ({ onClose }) => {
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const BASE_URL = process.env.REACT_APP_BASE_URL;
+
+
   // Fetch user data from local storage
   const user = JSON.parse(localStorage.getItem("user"));
 
@@ -377,7 +380,7 @@ const ManualAddItems = ({ onClose }) => {
     }
   
     setIsLoading(true);
-    fetch(`http://localhost:8081/api/items/cut-out/${bNumber}`)
+    fetch(`${BASE_URL}/api/items/cut-out/${bNumber}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Failed to fetch item details");  
@@ -446,7 +449,7 @@ const ManualAddItems = ({ onClose }) => {
       User: user.username,
     };
 
-    fetch("http://localhost:8081/api/items/addItem", {
+    fetch(`${BASE_URL}/api/items/addItem`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newItem),

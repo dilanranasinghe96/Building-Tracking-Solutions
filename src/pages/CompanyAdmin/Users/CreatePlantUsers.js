@@ -17,6 +17,9 @@ function CreatePlantUsers() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  const BASE_URL = process.env.REACT_APP_BASE_URL;
+
+
   // Rest of your existing validation and form handling code remains the same
   const validateForm = () => {
     if (password !== confirmPassword) {
@@ -55,7 +58,7 @@ function CreatePlantUsers() {
     if (!validateForm()) return;
   
     try {
-      const response = await fetch("http://localhost:8081/api/auth/register", {
+      const response = await fetch(`${BASE_URL}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -1,7 +1,8 @@
-import { Lock, User, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Lock, User } from 'lucide-react';
 import React, { useEffect, useState } from "react";
 import { Alert, Button, Container, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+
 
 function LoginPage() {
   const [username, setUsername] = useState("");
@@ -9,6 +10,9 @@ function LoginPage() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+
+  const BASE_URL = process.env.REACT_APP_BASE_URL;
+
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -27,7 +31,7 @@ function LoginPage() {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:8081/api/auth/login", {
+      const response = await fetch(`${BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),

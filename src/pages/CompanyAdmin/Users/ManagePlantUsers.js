@@ -144,10 +144,13 @@ function ManagePlantUsers() {
     userId: null, 
     userType: '' 
   });
+
+  const BASE_URL = process.env.REACT_APP_BASE_URL;
+
   
   // Fetch users from the backend
   useEffect(() => {
-    fetch("http://localhost:8081/api/auth/users")
+    fetch(`${BASE_URL}/api/auth/users`)
   .then((response) => {
     if (!response.ok) {
       throw new Error("Failed to fetch users");
@@ -164,7 +167,7 @@ function ManagePlantUsers() {
     setError("Failed to fetch users");
   });
 
-  }, []);
+  }, [BASE_URL]);
   
   const handleDelete = (userId, userType) => {
     // Open confirmation modal without deleting immediately

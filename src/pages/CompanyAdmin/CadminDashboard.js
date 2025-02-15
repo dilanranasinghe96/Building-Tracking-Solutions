@@ -18,13 +18,16 @@ import {
 const ProductionDashboard = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const BASE_URL = process.env.REACT_APP_BASE_URL;
+
   
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#ff7300'];
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:8081/api/charts/all-data');
+        const response = await fetch(`${BASE_URL}/api/charts/all-data`);
         const result = await response.json();
         setData(result);
         setLoading(false);
@@ -35,7 +38,7 @@ const ProductionDashboard = () => {
     };
 
     fetchData();
-  }, []);
+  }, [BASE_URL]);
 
   const getTodayProduction = () => {
     const today = new Date().toISOString().split('T')[0];
