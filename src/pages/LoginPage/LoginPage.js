@@ -9,6 +9,7 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const navigate = useNavigate();
 
   const BASE_URL = process.env.REACT_APP_BASE_URL;
@@ -29,42 +30,52 @@ function LoginPage() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
+  
     try {
       const response = await fetch(`${BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       });
-
+  
       if (!response.ok) {
         throw new Error("Invalid credentials");
       }
-
+  
       const data = await response.json();
-
+      
       const userData = {
         username: data.user.username,
         email: data.user.email,
         role: data.user.role,
         plant: data.user.plant,
       };
-
+  
       localStorage.setItem("user", JSON.stringify(userData));
-
-      if (userData.role === "company admin") {
-        navigate("/cadmindashboard");
-      } else if (userData.role === "plant user" || userData.role === "user") {
-        navigate("/home");
-      } else if (userData.role === "main admin") {
-        navigate("/manageallusers");
-      } else if (userData.role === "cut in") {
-        navigate("/cutintag");
-      }
+  
+      // Show success alert
+      setShowSuccessAlert(true);
+      setTimeout(() => {
+        setShowSuccessAlert(false);
+        
+  
+        // Navigate based on role
+        if (userData.role === "company admin") {
+          navigate("/cadmindashboard");
+        } else if (userData.role === "plant user" || userData.role === "user") {
+          navigate("/home");
+        } else if (userData.role === "main admin") {
+          navigate("/cadmindashboard");
+        } else if (userData.role === "cut in") {
+          navigate("/cutintag");
+        }
+      }, 1500);
+      
     } catch (error) {
       setError(error.message);
     }
   };
+  
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -153,7 +164,19 @@ function LoginPage() {
           </Form>
         </div>
       </Container>
+
+       {/* Success Alert */}
+       <Alert 
+         show={showSuccessAlert} 
+        variant="success" 
+        className="position-absolute top-0 start-50 translate-middle-x mt-3 p-2 px-4"
+      >
+         Successfully logged in!
+      </Alert>
+
     </div>
+
+    
   );
 }
 

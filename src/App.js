@@ -2,6 +2,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
 import React from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import AutoLogout from "./components/AutoLogout/AutoLogout";
 import Footer from "./components/Footer/Footer";
 import PrivateRoute from "./components/PrivateRoute/PrivateRoute";
 import Navbar from "./components/navbar/Navbar";
@@ -15,7 +16,6 @@ import CreateAllUsers from "./pages/MainAdmin/CreateAllUsers";
 import MainAdminPage from "./pages/MainAdmin/MainAdminPage";
 import ManageAllUsers from "./pages/MainAdmin/ManageAllUsers";
 import RegisterPage from "./pages/RegisterPage/RegisterPage";
-import AutoLogout from "./components/AutoLogout/AutoLogout";
 
 
 function App() {
@@ -36,11 +36,11 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
 
           {/* Protected routes */}
-          <Route element={<PrivateRoute allowedRoles={["plant user", "company admin"]} />}>
+          <Route element={<PrivateRoute allowedRoles={["plant user", "company admin","main admin"]} />}>
             <Route path="/home" element={<HomePage />} />
           </Route>
 
-          <Route element={<PrivateRoute allowedRoles={["company admin"]} />}>
+          <Route element={<PrivateRoute allowedRoles={["company admin","main admin"]} />}>
             <Route path="/cadmindashboard" element={<CompanyAdminPage />} />
             <Route path="/createusers" element={<CreatePlantUsers />} />
             <Route path="/manageusers" element={<ManagePlantUsers />} />
@@ -50,9 +50,9 @@ function App() {
             <Route path="/mainadmin" element={<MainAdminPage />} />
             <Route path="/manageallusers" element={<ManageAllUsers />} />
             <Route path="/createallusers" element={<CreateAllUsers />} />
-
+            
           </Route>
-          <Route element={<PrivateRoute allowedRoles={["cut in"]} />}>
+          <Route element={<PrivateRoute allowedRoles={["cut in","company admin","main admin"]} />}>
             <Route path="/cutintag" element={<CutInTag />} />
            
           </Route>

@@ -90,124 +90,121 @@ function ManageAllUsers() {
     <Container>
       {error && <Alert variant="danger">{error}</Alert>}
 
-      <Row>
-        <Col md={6}>
-          <div 
-            className="bg-white rounded shadow-lg p-4 mb-4"
-            style={{ backgroundColor: 'rgba(255,255,255,0.9)' }}
-          >
-            <h3 className="text-center text-primary mb-4">Company Admins</h3>
-            <Table striped bordered hover responsive>
-              <thead className="table-dark">
-                <tr>
-                  <th>Username</th>
-                  <th>Email</th>
-                  <th>Phone</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {companyAdmins.map((user) => (
-                  <tr key={user.id}>
-                    <td>{user.username}</td>
-                    <td>{user.email}</td>
-                    <td>{user.phone}</td>
-                    <td>
-                      <Button 
-                        variant="danger" 
-                        size="sm" 
-                        onClick={() => handleDelete(user.id, "company admin")}
-                      >
-                        Delete
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </div>
-        </Col>
-
-        <Col md={6}>
-          <div 
-            className="bg-white rounded shadow-lg p-4 mb-4"
-            style={{ backgroundColor: 'rgba(255,255,255,0.9)' }}
-          >
-            <h3 className="text-center text-primary mb-4">Plant Users</h3>
-            <Table striped bordered hover responsive>
-              <thead className="table-dark">
-                <tr>
-                  <th>Username</th>
-                  <th>Email</th>
-                  <th>Phone</th>
-                  <th>Plant</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {plantUsers.map((user) => (
-                  <tr key={user.id}>
-                    <td>{user.username}</td>
-                    <td>{user.email}</td>
-                    <td>{user.phone}</td>
-                    <td>{user.plant}</td>
-                    <td>
-                      <Button 
-                        variant="danger" 
-                        size="sm" 
-                        onClick={() => handleDelete(user.id, "plant user")}
-                      >
-                        Delete
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </div>
-        </Col>
-
-      </Row>
       <Row className="justify-content-center">
-      <Col md={6}>
-          <div 
-            className="bg-white rounded shadow-lg p-4 mb-4"
-            style={{ backgroundColor: 'rgba(255,255,255,0.9)' }}
-          >
-            <h3 className="text-center text-primary mb-4">Cut In Users</h3>
-            <Table striped bordered hover responsive>
-              <thead className="table-dark">
-                <tr>
-                  <th>Username</th>
-                  <th>Email</th>
-                  <th>Phone</th>
-                  <th>Actions</th>
+      <Col md={6} className="justify-content-center">
+        
+        <div 
+          className="bg-white rounded shadow-lg p-4 mb-4"
+          style={{ backgroundColor: 'rgba(255,255,255,0.9)' }}
+        >
+          <h3 className="text-center text-primary mb-4">Company Admins</h3>
+          <Table striped bordered hover responsive>
+            <thead className="table-dark">
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {companyAdmins.map((user) => (
+                <tr key={user.id}>
+                  <td>{user.username}</td>
+                  <td>{user.email}</td>
+                  <td>{user.phone}</td>
+                  <td>
+                    <Button 
+                      variant="danger" 
+                      size="sm" 
+                      onClick={() => handleDelete(user.id, "company admin")}
+                    >
+                      Delete
+                    </Button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {cutinUsers.map((user) => (
-                  <tr key={user.id}>
-                    <td>{user.username}</td>
-                    <td>{user.email}</td>
-                    <td>{user.phone}</td>
-                    <td>
-                      <Button 
-                        variant="danger" 
-                        size="sm" 
-                        onClick={() => handleDelete(user.id, "company admin")}
-                      >
-                        Delete
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </div>
-        </Col>
-
-      </Row>
+              ))}
+            </tbody>
+          </Table>
+        </div>
       
+
+      
+        <div 
+          className="bg-white rounded shadow-lg p-4 mb-4"
+          style={{ backgroundColor: 'rgba(255,255,255,0.9)' }}
+        >
+          <h3 className="text-center text-primary mb-4">Plant Users</h3>
+          <Table striped bordered hover responsive>
+            <thead className="table-dark">
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Plant</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {plantUsers.map((user) => (
+                <tr key={user.id}>
+                  <td>{user.username}</td>
+                  <td>{user.email}</td>
+                  <td>{user.phone}</td>
+                  <td>{user.plant}</td>
+                  <td>
+                    <Button 
+                      variant="danger" 
+                      size="sm" 
+                      onClick={() => handleDelete(user.id, "plant user")}
+                    >
+                      Delete
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
+
+        <div 
+          className="bg-white rounded shadow-lg p-4 mb-4"
+          style={{ backgroundColor: 'rgba(255,255,255,0.9)' }}
+        >
+          <h3 className="text-center text-primary mb-4">Cut In Users</h3>
+          <Table striped bordered hover responsive>
+            <thead className="table-dark">
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cutinUsers.map((user) => (
+                <tr key={user.id}>
+                  <td>{user.username}</td>
+                  <td>{user.email}</td>
+                  <td>{user.phone}</td>
+                  <td>
+                    <Button 
+                      variant="danger" 
+                      size="sm" 
+                      onClick={() => handleDelete(user.id, "company admin")}
+                    >
+                      Delete
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
+      
+
+    </Col>     
+        </Row> 
 
       <Modal show={deleteModal.show} onHide={() => setDeleteModal({ show: false, user: null, type: '' })}>
         <Modal.Header closeButton>
