@@ -237,6 +237,7 @@ const ManualAddItems = ({ onClose }) => {
                   value={cutPanelShortage}
                   onChange={handleCutPanelShortageChange}
                   min="0"
+                  
                 />
               </div>
               <div className="col-md-4">

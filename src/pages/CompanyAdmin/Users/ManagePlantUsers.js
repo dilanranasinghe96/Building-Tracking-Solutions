@@ -1,143 +1,13 @@
-
-
-// import React, { useEffect, useState } from "react";
-// import { Alert, Button, Container, Modal, Table } from 'react-bootstrap';
-
-// function ManagePlantUsers() {
-//   const [users, setUsers] = useState([]);
-//   const [error, setError] = useState("");
-//   const [showDeleteModal, setShowDeleteModal] = useState(false);
-//   const [userToDelete, setUserToDelete] = useState(null);
-
-//   // Fetch users from the backend
-//   useEffect(() => {
-//     fetch("http://localhost:8081/api/auth/users")
-//   .then((response) => {
-//     if (!response.ok) {
-//       throw new Error("Failed to fetch users");
-//     }
-//     return response.json();
-//   })
-//   .then((data) => {
-//     setUsers(data.filter((user) => user.role === "plant user"));
-//   })
-//   .catch(() => {
-//     setError("Failed to fetch users");
-//   });
-
-//   }, []);
-
-//   // Open delete confirmation modal
-//   const handleDeleteClick = (userId) => {
-//     setUserToDelete(userId);
-//     setShowDeleteModal(true);
-//   };
-
-//   // Confirm and delete user
-//   const confirmDelete = () => {
-//     if (!userToDelete) return;
-    
-//     fetch(`http://localhost:8081/api/auth/users/${userToDelete}`, {
-//       method: "DELETE",
-//     })
-//       .then((response) => {
-//         if (response.ok) {
-//           setUsers(users.filter((user) => user.id !== userToDelete));
-//           setShowDeleteModal(false);
-//           setUserToDelete(null);
-//         } else {
-//           setError("Failed to delete user");
-//         }
-//       })
-//       .catch(() => {
-//         setError("Failed to delete user");
-//       });
-    
-//   };
-
-//   return (
-//     <div 
-//       style={{
-//         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
-//         minHeight: '100vh', 
-//         paddingTop: '50px'  
-//       }}
-//     >
-//       <Container 
-//         className="bg-white rounded shadow-lg p-4"
-//         style={{ 
-//           maxWidth: '1000px', 
-//           backgroundColor: 'rgba(255,255,255,0.9)',
-//           borderRadius: '15px'
-//         }}
-//       >
-//         <h2 className="text-center text-primary mb-4">Manage Plant Users</h2>
-        
-//         {error && <Alert variant="danger">{error}</Alert>}
-
-//         <Table striped bordered hover responsive>
-//           <thead className="table-dark">
-//             <tr>
-//               <th>Username</th>
-//               <th>Email</th>
-//               <th>Phone</th>
-//               <th>Plant</th>
-//               <th>Actions</th>
-//             </tr>
-//           </thead>
-//           <tbody>
-//             {users.map((user) => (
-//               <tr key={user.id}>
-//                 <td>{user.username}</td>
-//                 <td>{user.email}</td>
-//                 <td>{user.phone}</td>
-//                 <td>{user.plant}</td>
-//                 <td>
-//                   <Button 
-//                     variant="danger" 
-//                     size="sm" 
-//                     onClick={() => handleDeleteClick(user.id)}
-//                   >
-//                     Delete
-//                   </Button>
-//                 </td>
-//               </tr>
-//             ))}
-//           </tbody>
-//         </Table>
-//       </Container>
-
-//       {/* Delete Confirmation Modal */}
-//       <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
-//         <Modal.Header closeButton>
-//           <Modal.Title>Confirm Delete</Modal.Title>
-//         </Modal.Header>
-//         <Modal.Body>
-//           Are you sure you want to delete this user?
-//         </Modal.Body>
-//         <Modal.Footer>
-//           <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
-//             Cancel
-//           </Button>
-//           <Button variant="danger" onClick={confirmDelete}>
-//             Delete
-//           </Button>
-//         </Modal.Footer>
-//       </Modal>
-//     </div>
-//   );
-// }
-
-// export default ManagePlantUsers;
-
-
 import React, { useEffect, useState } from "react";
 import { Alert, Button, Col, Container, Modal, Row, Table } from 'react-bootstrap';
 
 
-function ManagePlantUsers() {
+function ManageAllUsers() {
   const [plantUsers, setPlantUsers] = useState([]);
   const [cutinUsers, setCutinUsers] = useState([]);
+  const [allViewUsers, setAllViewUsers] = useState([]);
+  const [plantViewUsers, setPlantViewUsers] = useState([]);
+  const [cuttingViewUsers, setCuttingViewUsers] = useState([]);
   const [error, setError] = useState("");
   const [deleteModal, setDeleteModal] = useState({ 
     show: false, 
@@ -160,8 +30,16 @@ function ManagePlantUsers() {
   .then((data) => {
     const plantUsers = data.filter((user) => user.role === "plant user");
     const cutinUsers = data.filter((user) => user.role === "cut in");
+    const allViewUsers = data.filter((user) => user.role === "all view");
+    const plantViewUsers = data.filter((user) => user.role === "plant view");
+    const cuttingViewUsers = data.filter((user) => user.role === "cutting view");
+
     setPlantUsers(plantUsers);
     setCutinUsers(cutinUsers);
+    setAllViewUsers(allViewUsers);
+    setPlantViewUsers(plantViewUsers);
+    setCuttingViewUsers(cuttingViewUsers);
+
   })
   .catch(() => {
     setError("Failed to fetch users");
@@ -182,18 +60,27 @@ function ManagePlantUsers() {
     const { userId, userType } = deleteModal;
   
     
-    fetch(`http://localhost:8081/api/auth/users/${userId}`, {
+    fetch(`${BASE_URL}/api/auth/users/${userId}`, {
       method: "DELETE",
     })
       .then((response) => {
         if (!response.ok) {
           throw new Error("Failed to delete user");
         }
-        if (userType === "plant user") {
+         else if (userType === "plant user") {
           setPlantUsers(plantUsers.filter((user) => user.id !== userId));
         }
-        else{
+        else if (userType === "cut in") {
           setCutinUsers(cutinUsers.filter((user) => user.id !== userId));
+        }
+        else if (userType === "all view") {
+          setAllViewUsers(allViewUsers.filter((user) => user.id !== userId));
+        }
+        else if (userType === "plant view") {
+          setPlantViewUsers(plantViewUsers.filter((user) => user.id !== userId));
+        }
+        else if (userType === "cutting view") {
+          setCuttingViewUsers(cuttingViewUsers.filter((user) => user.id !== userId));
         }
         // Close the modal after successful deletion
         setDeleteModal({ show: false, userId: null, userType: "" });
@@ -218,86 +105,197 @@ function ManagePlantUsers() {
     <Container>
       {error && <Alert variant="danger">{error}</Alert>}
 
-      <Row>
-        
+      <Row className="justify-content-center">
+      <Col md={6} className="justify-content-center">
 
-        <Col md={6}>
-          <div 
-            className="bg-white rounded shadow-lg p-4 mb-4"
-            style={{ backgroundColor: 'rgba(255,255,255,0.9)' }}
-          >
-            <h3 className="text-center text-primary mb-4">Plant Users</h3>
-            <Table striped bordered hover responsive>
-              <thead className="table-dark">
-                <tr>
-                  <th>Username</th>
-                  <th>Email</th>
-                  <th>Phone</th>
-                  <th>Plant</th>
-                  <th>Actions</th>
+     
+
+      
+        <div 
+          className="bg-white rounded shadow-lg p-4 mb-4"
+          style={{ backgroundColor: 'rgba(255,255,255,0.9)' }}
+        >
+          <h3 className="text-center text-primary mb-4">Plant Users</h3>
+          <Table striped bordered hover responsive>
+            <thead className="table-dark">
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Plant</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {plantUsers.map((user) => (
+                <tr key={user.id}>
+                  <td>{user.username}</td>
+                  <td>{user.email}</td>
+                  <td>{user.phone}</td>
+                  <td>{user.plant}</td>
+                  <td>
+                    <Button 
+                      variant="danger" 
+                      size="sm" 
+                      onClick={() => handleDelete(user.id, "plant user")}
+                    >
+                      Delete
+                    </Button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {plantUsers.map((user) => (
-                  <tr key={user.id}>
-                    <td>{user.username}</td>
-                    <td>{user.email}</td>
-                    <td>{user.phone}</td>
-                    <td>{user.plant}</td>
-                    <td>
-                      <Button 
-                        variant="danger" 
-                        size="sm" 
-                        onClick={() => handleDelete(user.id, "plant user")}
-                      >
-                        Delete
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </div>
-        </Col>
+              ))}
+            </tbody>
+          </Table>
+        </div>
 
-        <Col md={6}>
-          <div 
-            className="bg-white rounded shadow-lg p-4 mb-4"
-            style={{ backgroundColor: 'rgba(255,255,255,0.9)' }}
-          >
-            <h3 className="text-center text-primary mb-4">Cut In Users</h3>
-            <Table striped bordered hover responsive>
-              <thead className="table-dark">
-                <tr>
-                  <th>Username</th>
-                  <th>Email</th>
-                  <th>Phone</th>
-                  <th>Actions</th>
+        <div 
+          className="bg-white rounded shadow-lg p-4 mb-4"
+          style={{ backgroundColor: 'rgba(255,255,255,0.9)' }}
+        >
+          <h3 className="text-center text-primary mb-4">Cutting Users</h3>
+          <Table striped bordered hover responsive>
+            <thead className="table-dark">
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cutinUsers.map((user) => (
+                <tr key={user.id}>
+                  <td>{user.username}</td>
+                  <td>{user.email}</td>
+                  <td>{user.phone}</td>
+                  <td>
+                    <Button 
+                      variant="danger" 
+                      size="sm" 
+                      onClick={() => handleDelete(user.id, "company admin")}
+                    >
+                      Delete
+                    </Button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {cutinUsers.map((user) => (
-                  <tr key={user.id}>
-                    <td>{user.username}</td>
-                    <td>{user.email}</td>
-                    <td>{user.phone}</td>
-                    <td>
-                      <Button 
-                        variant="danger" 
-                        size="sm" 
-                        onClick={() => handleDelete(user.id, "company admin")}
-                      >
-                        Delete
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </div>
-        </Col>
+              ))}
+            </tbody>
+          </Table>
+        </div>
 
-      </Row>
+
+
+        <div 
+          className="bg-white rounded shadow-lg p-4 mb-4"
+          style={{ backgroundColor: 'rgba(255,255,255,0.9)' }}
+        >
+          <h3 className="text-center text-primary mb-4">All View Users</h3>
+          <Table striped bordered hover responsive>
+            <thead className="table-dark">
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {allViewUsers.map((user) => (
+                <tr key={user.id}>
+                  <td>{user.username}</td>
+                  <td>{user.email}</td>
+                  <td>{user.phone}</td>
+                  <td>
+                    <Button 
+                      variant="danger" 
+                      size="sm" 
+                      onClick={() => handleDelete(user.id, "main admin")}
+                    >
+                      Delete
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
+      
+
+        <div 
+          className="bg-white rounded shadow-lg p-4 mb-4"
+          style={{ backgroundColor: 'rgba(255,255,255,0.9)' }}
+        >
+          <h3 className="text-center text-primary mb-4">Plant View Users</h3>
+          <Table striped bordered hover responsive>
+            <thead className="table-dark">
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Plant</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {plantViewUsers.map((user) => (
+                <tr key={user.id}>
+                  <td>{user.username}</td>
+                  <td>{user.email}</td>
+                  <td>{user.phone}</td>
+                  <td>{user.plant}</td>
+                  <td>
+                    <Button 
+                      variant="danger" 
+                      size="sm" 
+                      onClick={() => handleDelete(user.id, "main admin")}
+                    >
+                      Delete
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
+
+
+        <div 
+          className="bg-white rounded shadow-lg p-4 mb-4"
+          style={{ backgroundColor: 'rgba(255,255,255,0.9)' }}
+        >
+          <h3 className="text-center text-primary mb-4">Cutting View Users</h3>
+          <Table striped bordered hover responsive>
+            <thead className="table-dark">
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cuttingViewUsers.map((user) => (
+                <tr key={user.id}>
+                  <td>{user.username}</td>
+                  <td>{user.email}</td>
+                  <td>{user.phone}</td>
+                  <td>
+                    <Button 
+                      variant="danger" 
+                      size="sm" 
+                      onClick={() => handleDelete(user.id, "main admin")}
+                    >
+                      Delete
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
+
+    </Col>     
+        </Row> 
 
       <Modal show={deleteModal.show} onHide={() => setDeleteModal({ show: false, user: null, type: '' })}>
         <Modal.Header closeButton>
@@ -323,4 +321,4 @@ function ManagePlantUsers() {
   );
 }
 
-export default ManagePlantUsers;
+export default ManageAllUsers;

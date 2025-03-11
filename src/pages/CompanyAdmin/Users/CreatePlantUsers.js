@@ -1,7 +1,7 @@
+import { Building, Eye, EyeOff, Lock, Mail, Phone, User, Users } from 'lucide-react';
 import React, { useState } from "react";
 import { Alert, Button, Container, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { User, Mail, Lock, Phone, Building, Eye, EyeOff, Users } from 'lucide-react';
 
 function CreatePlantUsers() {
   const [username, setUsername] = useState("");
@@ -68,7 +68,7 @@ function CreatePlantUsers() {
           confirmPassword,
           phone,
           role,
-          plant: role === "plant user" ? plant : " ",
+          plant: role === "plant user" || role==="plant view" ? plant : " ",
         }),
       });
   
@@ -218,12 +218,15 @@ function CreatePlantUsers() {
                 >
                   <option value="">Select Role</option>
                   <option value="plant user">Plant User</option>
-                  <option value="cut in">Cut In</option>
+                  <option value="cut in">Cutting</option>
+                  <option value="all view">All view</option>
+                  <option value="plant view">Plant view</option>
+                  <option value="cutting view">Cutting view</option>
                 </Form.Control>
               </div>
             </Form.Group>
 
-            {role === "plant user" && (
+            {role === "plant user" || role==="plant view" && (
               <Form.Group controlId="plant">
                 <Form.Label>Plant</Form.Label>
                 <div className="input-group mb-3">

@@ -1,3 +1,4 @@
+
 // Required Modules
 import bcrypt from "bcryptjs";
 import cors from "cors";
@@ -11,12 +12,15 @@ dotenv.config();
 
 // Initialize express app
 const app = express();
-const port = 8081;
+const port = process.env.PORT;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
+
+// Trust proxy for rate limiting
+app.set("trust proxy", 1);
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -234,11 +238,11 @@ app.get('/api/items/fg', (req, res) => {
   let params = [];
 
   if (plant) {
-    query = 'SELECT Id, bno, SO, Style, Style_Name, Cut_No, Colour, Size, BQty, Plant, Line, Damage_Pcs, Cut_Panel_Shortage, Good_Pcs, User, DATE(DateTime) AS Date FROM fg WHERE Plant = ? ORDER BY DateTime DESC;';
+    query = 'SELECT Id, bno, SO, Style, Style_Name, Cut_No, Colour, Size, BQty, Plant, Line, Damage_Pcs, Cut_Panel_Shortage, Good_Pcs, User, DATE(DateTime) AS Date,Subtraction FROM fg WHERE Plant = ? ORDER BY DateTime DESC;';
     params = [plant];
   } else {
     // Allow fetching all records when no plant is specified
-    query = 'SELECT Id, bno, SO, Style, Style_Name, Cut_No, Colour, Size, BQty, Plant, Line, Damage_Pcs, Cut_Panel_Shortage, Good_Pcs, User, DATE(DateTime) AS Date FROM fg ORDER BY DateTime DESC;';
+    query = 'SELECT Id, bno, SO, Style, Style_Name, Cut_No, Colour, Size, BQty, Plant, Line, Damage_Pcs, Cut_Panel_Shortage, Good_Pcs, User, DATE(DateTime) AS Date,Subtraction FROM fg ORDER BY DateTime DESC;';
   }
 
   db.query(query, params, (error, results) => {
@@ -248,6 +252,164 @@ app.get('/api/items/fg', (req, res) => {
     res.json(results);
   });
 });
+
+//Fg stock- fetch available quantity
+app.get('/api/items/availableQty', (req, res) => {
+  const { plant } = req.query;
+  let query;
+  let params = [];
+
+  if (plant) {
+    query = 'SELECT SO, Style, Style_Name, Cut_No, Colour, Size, Plant, Available_Qty FROM fg_available WHERE Plant = ? ;';
+    params = [plant];
+  } else {
+    // Allow fetching all records when no plant is specified
+    query = 'SELECT SO, Style, Style_Name, Cut_No, Colour, Size, Plant, Available_Qty FROM fg_available ;';
+  }
+
+  db.query(query, params, (error, results) => {
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.json(results);
+  });
+});
+
+
+//Fg stock- fetch available qty summary
+app.get('/api/items/availableQtySummary', (req, res) => {
+  const { plant } = req.query;
+  let query;
+  let params = [];
+
+  if (plant) {
+    query = 'SELECT Style, Style_Name, Colour, Size, Plant, Available_Qty FROM fg_available_summary WHERE Plant = ? ;';
+    params = [plant];
+  } else {
+    // Allow fetching all records when no plant is specified
+    query = 'SELECT Style, Style_Name, Colour, Size, Plant, Available_Qty FROM fg_available_summary;';
+  }
+
+  db.query(query, params, (error, results) => {
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.json(results);
+  });
+});
+
+
+
+//Get All production summary from fg_available_summary table
+app.get('/api/items/allProductionSummary', (req, res) => {
+  const { plant } = req.query;
+  let query;
+  let params = [];
+
+  if (plant) {
+    query = `SELECT Style_Name AS Style_Name, SUM(Available_Qty) AS finish_goods,Plant
+             FROM fg_available_summary 
+             WHERE Plant = ? 
+             GROUP BY Style_Name `;
+    params = [plant, plant];  // Adding plant twice to the params array
+  } else {
+    // Allow fetching all records when no plant is specified
+    query = `SELECT Style_Name AS Style_Name, SUM(Available_Qty) AS finish_goods,Plant 
+             FROM fg_available_summary 
+             GROUP BY Style_Name;`;
+  }
+
+  db.query(query, params, (error, results) => {
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.json(results);
+  });
+});
+
+//wip production view
+app.get('/api/items/wipproduction', (req, res) => {
+  const { plant } = req.query;
+  let query;
+  let params = [];
+
+  if (plant) {
+    query = 'SELECT SO, Style, Style_Name, Cut_No, Colour, Size, Plant, Available_Qty FROM wip_production WHERE Plant = ? ;';
+    params = [plant];
+  } else {
+    // Allow fetching all records when no plant is specified
+    query = 'SELECT SO, Style, Style_Name, Cut_No, Colour, Size, Plant, Available_Qty FROM wip_production ;';
+  }
+
+  db.query(query, params, (error, results) => {
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.json(results);
+  });
+});
+
+
+//wip production summary view
+app.get('/api/items/wipproductions-summary', (req, res) => {
+  let query ='SELECT Style_Name, Available_Qty FROM wip_production_summary;';
+
+  db.query(query, (error, results) => {
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.json(results);
+  });
+});
+
+
+//wipproductions summary plant
+app.get('/api/items/wipproductions-summary-plant', (req, res) => {
+  const { plant } = req.query;
+  let query;
+  let params = [];
+
+  if (plant) {
+    query = 'SELECT Plant,Style_Name ,Available_Qty FROM wip_production_summary_plant WHERE Plant = ? ;';
+    params = [plant];
+  } else {
+    // Allow fetching all records when no plant is specified
+    query = 'SELECT Plant,Style_Name ,Available_Qty FROM wip_production_summary_plant;';
+  }
+
+  db.query(query, params, (error, results) => {
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.json(results);
+  });
+});
+
+//wip cutting view
+app.get('/api/items/wip-cutting', (req, res) => {
+  let query ='SELECT SO,Style,Style_Name,Cut_No,Colour,Size, Available_Qty FROM wip_cutting;';
+
+  db.query(query, (error, results) => {
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.json(results);
+  });
+});
+
+
+//wip cutting summary view
+app.get('/api/items/wip-cutting-summary', (req, res) => {
+  let query ='SELECT Style_Name,Available_Qty FROM wip_cutting_summary;';
+
+  db.query(query, (error, results) => {
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.json(results);
+  });
+});
+
 
 
 app.get("/api/charts/all-data", (req, res) => {
@@ -278,7 +440,60 @@ app.get("/api/charts/all-data", (req, res) => {
   });
 });
 
+// app.post('/api/items/addItem', (req, res) => {
+//   const {
+//     bno, SO, Style, Style_Name, Cut_No, Colour, Size, BQty,
+//     Plant, Line, Damage_Pcs, Cut_Panel_Shortage, Good_Pcs, User
+//   } = req.body;
 
+//   // Check if any required fields are missing
+//   const requiredFields = ['bno', 'SO', 'Style', 'Style_Name', 'Cut_No', 'Colour', 'Size', 'BQty', 'Plant', 'Line', 'Good_Pcs', 'User'];
+//   for (let field of requiredFields) {
+//     if (!req.body[field]) {
+//       return res.status(400).json({ error: `${field} is required` });
+//     }
+//   }
+
+//   // Check if the bno already exists in the fg table
+//   const checkBnoSql = 'SELECT * FROM fg WHERE bno = ?';
+  
+//   db.query(checkBnoSql, [bno], (error, result) => {
+//     if (error) {
+//       console.error('Database query error:', error);
+//       return res.status(500).json({ error: 'Failed to check bno existence' });
+//     }
+
+//     if (result.length > 0) {
+//       // If the bno exists, return an error message
+//       return res.status(400).json({ error: 'BNo already exists in the fg table' });
+//     } else {
+//       // Proceed with inserting the new item since bno does not exist
+//       const sql = `
+//         INSERT INTO fg (
+//           bno, SO, Style, Style_Name, Cut_No, Colour, Size, BQty,
+//           Plant, Line, Damage_Pcs, Cut_Panel_Shortage, Good_Pcs,
+//           DateTime, User, Year, Month, Subtraction
+//         )
+//         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, 
+//           YEAR(CURRENT_DATE), MONTH(CURRENT_DATE), 0)
+//       `;
+    
+//       db.query(sql, [
+//         bno, SO, Style, Style_Name, Cut_No, Colour, Size, BQty,
+//         Plant, Line, Damage_Pcs, Cut_Panel_Shortage, Good_Pcs, User
+//       ], (error, result) => {
+//         if (error) {
+//           console.error('Database insert error:', error);
+//           return res.status(500).json({ error: 'Failed to add item' });
+//         }
+//         res.status(201).json({
+//           message: 'Item added successfully',
+//           data: result
+//         });
+//       });
+//     }
+//   });
+// });
 
 
 
@@ -289,9 +504,21 @@ app.post('/api/items/addItem', (req, res) => {
     Plant, Line, Damage_Pcs, Cut_Panel_Shortage, Good_Pcs, User
   } = req.body;
 
+    // Check if any required fields are missing
+    const requiredFields = ['bno', 'SO', 'Style', 'Style_Name', 'Cut_No', 'Colour', 'Size', 'BQty', 'Plant', 'Line', 'Good_Pcs', 'User'];
+    for (let field of requiredFields) {
+      if (!req.body[field]) {
+        return res.status(400).json({ error: `${field} is required` });
+      }
+    }
+
+  // Convert 0 values to NULL
+  const damagePcsValue = Damage_Pcs === 0 ? null : Damage_Pcs;
+  const cutPanelShortageValue = Cut_Panel_Shortage === 0 ? null : Cut_Panel_Shortage;
+
   // Check if the bno already exists in the fg table
   const checkBnoSql = 'SELECT * FROM fg WHERE bno = ?';
-  
+
   db.query(checkBnoSql, [bno], (error, result) => {
     if (error) {
       console.error('Database query error:', error);
@@ -312,10 +539,10 @@ app.post('/api/items/addItem', (req, res) => {
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, 
           YEAR(CURRENT_DATE), MONTH(CURRENT_DATE), 0)
       `;
-    
+
       db.query(sql, [
         bno, SO, Style, Style_Name, Cut_No, Colour, Size, BQty,
-        Plant, Line, Damage_Pcs, Cut_Panel_Shortage, Good_Pcs, User
+        Plant, Line, damagePcsValue, cutPanelShortageValue, Good_Pcs, User
       ], (error, result) => {
         if (error) {
           console.error('Database insert error:', error);
@@ -332,9 +559,8 @@ app.post('/api/items/addItem', (req, res) => {
 
 
 
-
 app.get('/api/so-list', (req, res) => {
-  db.query('SELECT DISTINCT SO FROM cut_in', (error, results) => {
+  db.query('SELECT DISTINCT SO FROM cut_in ORDER BY Date DESC', (error, results) => {
     if (error) {
       return res.status(500).json({ error: error.message });
     }
@@ -440,6 +666,6 @@ function isValidPhone(phone) {
 
 // Start server
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+  console.log(`https://82.112.230.12:3002`);
 
 });

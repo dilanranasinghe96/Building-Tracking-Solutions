@@ -24,6 +24,11 @@ const ProductionDashboard = () => {
   
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#ff7300'];
 
+  const user = JSON.parse(localStorage.getItem("user"));
+  const userPlant = user?.plant;
+  const userRole = user?.role;
+  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -40,24 +45,72 @@ const ProductionDashboard = () => {
     fetchData();
   }, [BASE_URL]);
 
+  // const getTodayProduction = () => {
+  //   const today = new Date().toISOString().split('T')[0];
+  //   const todayData = data.filter(item => item.Date === today);
+
+  //   return ['CTM-P', 'CTM-D', 'CTM-M'].map(plant => ({
+  //     plant,
+  //     goodPcs: todayData
+  //       .filter(item => item.Plant === plant)
+  //       .reduce((sum, item) => sum + (parseInt(item.Good_Pcs) || 0), 0),
+     
+  //   }));
+  // };
+
   const getTodayProduction = () => {
     const today = new Date().toISOString().split('T')[0];
     const todayData = data.filter(item => item.Date === today);
-
-    return ['CTM-P', 'CTM-D', 'CTM-M'].map(plant => ({
-      plant,
-      goodPcs: todayData
-        .filter(item => item.Plant === plant)
-        .reduce((sum, item) => sum + (parseInt(item.Good_Pcs) || 0), 0),
-     
-    }));
+  
+    if (userRole === 'main admin' || userRole === 'company admin' || userRole === 'all view') {
+      return ['CTM-P', 'CTM-D', 'CTM-M'].map(plant => ({
+        plant,
+        goodPcs: todayData
+          .filter(item => item.Plant === plant)
+          .reduce((sum, item) => sum + (parseInt(item.Good_Pcs) || 0), 0),
+      }));
+    } else {
+      return [{
+        plant: userPlant,
+        goodPcs: todayData
+          .filter(item => item.Plant === userPlant)
+          .reduce((sum, item) => sum + (parseInt(item.Good_Pcs) || 0), 0),
+      }];
+    }
   };
+  
+
+
+
+  // const getStyleDistribution = () => {
+  //   const currentMonth = new Date().getMonth() + 1; // Get current month (1-based)
+  //   const currentYear = new Date().getFullYear(); // Get current year
+  
+  //   const styleGroups = data.reduce((acc, item) => {
+  //     if (item.Style && item.Good_Pcs && item.Month === currentMonth && item.Year === currentYear) {
+  //       acc[item.Style] = (acc[item.Style] || 0) + (parseInt(item.Good_Pcs) || 0);
+  //     }
+  //     return acc;
+  //   }, {});
+  
+  //   return Object.entries(styleGroups)
+  //     .map(([style, value]) => ({
+  //       name: style,
+  //       value
+  //     }))
+  //     .sort((a, b) => b.value - a.value);
+  // };
+  
 
   const getStyleDistribution = () => {
     const currentMonth = new Date().getMonth() + 1; // Get current month (1-based)
     const currentYear = new Date().getFullYear(); // Get current year
   
-    const styleGroups = data.reduce((acc, item) => {
+    const filteredData = (userRole === 'main admin' || userRole === 'company admin' || userRole === 'all view' )
+      ? data 
+      : data.filter(item => item.Plant === userPlant);
+  
+    const styleGroups = filteredData.reduce((acc, item) => {
       if (item.Style && item.Good_Pcs && item.Month === currentMonth && item.Year === currentYear) {
         acc[item.Style] = (acc[item.Style] || 0) + (parseInt(item.Good_Pcs) || 0);
       }
@@ -71,6 +124,37 @@ const ProductionDashboard = () => {
       }))
       .sort((a, b) => b.value - a.value);
   };
+  
+
+  // const getDailyData = () => {
+  //   const currentDate = new Date();
+  //   const currentMonth = currentDate.getMonth() + 1; // Get current month (1-based)
+  //   const currentYear = currentDate.getFullYear(); // Get current year
+  //   const daysInMonth = new Date(currentYear, currentMonth, 0).getDate(); // Get number of days in the month
+  
+  //   // Initialize an object with all days set to 0
+  //   const dailyGroups = {};
+  //   for (let day = 1; day <= daysInMonth; day++) {
+  //     const date = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  //     dailyGroups[date] = {
+  //       date,
+  //       totalGoodPcs: 0 // Add total company good pcs field
+  //     };
+  //   }
+  
+  //   // Populate with actual data
+  //   data.forEach((item) => {
+  //     if (item.Month === currentMonth && item.Year === currentYear) {
+  //       const date = item.Date;
+  //       if (dailyGroups[date]) {
+  //         dailyGroups[date].totalGoodPcs += parseInt(item.Good_Pcs) || 0; // Sum up all plants
+  //       }
+
+  //     }
+  //   });
+  
+  //   return Object.values(dailyGroups).sort((a, b) => new Date(a.date) - new Date(b.date));
+  // };
   
 
   const getDailyData = () => {
@@ -89,12 +173,15 @@ const ProductionDashboard = () => {
       };
     }
   
+    // Filter data based on userPlant
+    const filteredData = (userRole === 'main admin' || userRole === 'company admin' || userRole === 'all view') ? data : data.filter(item => item.Plant === userPlant);
+  
     // Populate with actual data
-    data.forEach((item) => {
+    filteredData.forEach((item) => {
       if (item.Month === currentMonth && item.Year === currentYear) {
         const date = item.Date;
         if (dailyGroups[date]) {
-          dailyGroups[date].totalGoodPcs += parseInt(item.Good_Pcs) || 0; // Sum up all plants
+          dailyGroups[date].totalGoodPcs += parseInt(item.Good_Pcs) || 0; // Sum up all plants or selected plant
         }
       }
     });
@@ -132,43 +219,144 @@ const ProductionDashboard = () => {
     return Object.values(dailyGroups).sort((a, b) => new Date(a.date) - new Date(b.date));
   };
   
-  const getDamageAndShortageData = () => {
-    const today = new Date();
-    const currentYear = today.getFullYear();
-    const currentMonth = today.getMonth() + 1; // Get current month (1-based)
-    const daysInMonth = new Date(currentYear, currentMonth, 0).getDate(); // Get total days in month
 
-    // Initialize dataset with zero values for all days in the current month
-    const dailyData = Array.from({ length: daysInMonth }, (_, i) => {
-        const date = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(i + 1).padStart(2, '0')}`;
-        return {
-            date,
-            Damage_Pcs: 0,
-            Cut_Panel_Shortage: 0,
-        };
-    });
+//   const getDailyDataForPlant = (plant) => {
+//     if (userPlant !== ' ') {
+//         return []; // If a specific plant is selected, do not show any data
+//     }
 
-    // Convert array to object for fast lookup
-    const dailyMap = dailyData.reduce((acc, obj) => {
-        acc[obj.date] = obj;
-        return acc;
-    }, {});
+//     const currentDate = new Date();
+//     const currentMonth = currentDate.getMonth() + 1; // Get current month (1-based)
+//     const currentYear = currentDate.getFullYear(); // Get current year
+//     const daysInMonth = new Date(currentYear, currentMonth, 0).getDate(); // Get total days in month
 
-    // Update with actual data
-    data.forEach(item => {
-        const itemDate = item.Date;
-        if (item.Year === currentYear && item.Month === currentMonth) { // Ensure current month/year match
-            if (dailyMap[itemDate]) {
-                dailyMap[itemDate].Damage_Pcs += parseInt(item.Damage_Pcs) || 0;
-                dailyMap[itemDate].Cut_Panel_Shortage += parseInt(item.Cut_Panel_Shortage) || 0;
-            }
-        }
-    });
+//     // Initialize an object with all days set to 0
+//     const dailyGroups = {};
+//     for (let day = 1; day <= daysInMonth; day++) {
+//         const date = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+//         dailyGroups[date] = {
+//             date,
+//             goodPcs: 0 // Specific to selected plant
+//         };
+//     }
 
-    return Object.values(dailyMap);
+//     // Populate with actual data for the selected plant
+//     data.forEach((item) => {
+//         if (item.Month === currentMonth && item.Year === currentYear && item.Plant === plant) {
+//             const date = item.Date;
+//             if (dailyGroups[date]) {
+//                 dailyGroups[date].goodPcs += parseInt(item.Good_Pcs) || 0;
+//             }
+//         }
+//     });
+
+//     return Object.values(dailyGroups).sort((a, b) => new Date(a.date) - new Date(b.date));
+// };
+
+
+
+//   const getDamageAndShortageData = () => {
+//     const today = new Date();
+//     const currentYear = today.getFullYear();
+//     const currentMonth = today.getMonth() + 1; // Get current month (1-based)
+//     const daysInMonth = new Date(currentYear, currentMonth, 0).getDate(); // Get total days in month
+
+//     // Initialize dataset with zero values for all days in the current month
+//     const dailyData = Array.from({ length: daysInMonth }, (_, i) => {
+//         const date = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(i + 1).padStart(2, '0')}`;
+//         return {
+//             date,
+//             Damage_Pcs: 0,
+//             Cut_Panel_Shortage: 0,
+//         };
+//     });
+
+//     // Convert array to object for fast lookup
+//     const dailyMap = dailyData.reduce((acc, obj) => {
+//         acc[obj.date] = obj;
+//         return acc;
+//     }, {});
+
+//     // Update with actual data
+//     data.forEach(item => {
+//         const itemDate = item.Date;
+//         if (item.Year === currentYear && item.Month === currentMonth) { // Ensure current month/year match
+//             if (dailyMap[itemDate]) {
+//                 dailyMap[itemDate].Damage_Pcs += parseInt(item.Damage_Pcs) || 0;
+//                 dailyMap[itemDate].Cut_Panel_Shortage += parseInt(item.Cut_Panel_Shortage) || 0;
+//             }
+//         }
+//     });
+
+//     return Object.values(dailyMap);
+// };
+
+
+const getDamageAndShortageData = () => {
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth() + 1; // Get current month (1-based)
+  const daysInMonth = new Date(currentYear, currentMonth, 0).getDate(); // Get total days in month
+
+  // Initialize dataset with zero values for all days in the current month
+  const dailyData = Array.from({ length: daysInMonth }, (_, i) => {
+    const date = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(i + 1).padStart(2, '0')}`;
+    return {
+      date,
+      Damage_Pcs: 0,
+      Cut_Panel_Shortage: 0,
+    };
+  });
+
+  // Convert array to object for fast lookup
+  const dailyMap = dailyData.reduce((acc, obj) => {
+    acc[obj.date] = obj;
+    return acc;
+  }, {});
+
+  // Filter data based on userPlant
+  const filteredData = (userRole === 'main admin' || userRole === 'company admin' || userRole === 'all view') ? data : data.filter(item => item.Plant === userPlant);
+
+  // Update with actual data
+  filteredData.forEach(item => {
+    const itemDate = item.Date;
+    if (item.Year === currentYear && item.Month === currentMonth) { // Ensure current month/year match
+      if (dailyMap[itemDate]) {
+        dailyMap[itemDate].Damage_Pcs += parseInt(item.Damage_Pcs) || 0;
+        dailyMap[itemDate].Cut_Panel_Shortage += parseInt(item.Cut_Panel_Shortage) || 0;
+      }
+    }
+  });
+
+  return Object.values(dailyMap);
 };
 
 
+
+// const getMonthlyProductionData = () => {
+//   const currentDate = new Date();
+//   const monthlyGroups = {};
+
+//   // Initialize last 12 months with zero values
+//   for (let i = 11; i >= 0; i--) {
+//     let pastDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+//     let key = `${pastDate.getFullYear()}-${String(pastDate.getMonth() + 1).padStart(2, '0')}`;
+//     monthlyGroups[key] = { 
+//       month: pastDate.toLocaleString('default', { month: 'short', year: 'numeric' }), // Example: "Feb 2024"
+//       goodPcs: 0 
+//     };
+//   }
+
+//   // Aggregate Good_Pcs for each month
+//   data.forEach((item) => {
+//     let key = `${item.Year}-${String(item.Month).padStart(2, '0')}`;
+//     if (monthlyGroups[key]) {
+//       monthlyGroups[key].goodPcs += parseInt(item.Good_Pcs) || 0;
+//     }
+//   });
+
+//   return Object.values(monthlyGroups);
+// };
 
 const getMonthlyProductionData = () => {
   const currentDate = new Date();
@@ -184,8 +372,11 @@ const getMonthlyProductionData = () => {
     };
   }
 
+  // Filter data based on userPlant
+  const filteredData = (userRole === 'main admin' || userRole === 'company admin' || userRole === 'all view') ? data : data.filter(item => item.Plant === userPlant);
+
   // Aggregate Good_Pcs for each month
-  data.forEach((item) => {
+  filteredData.forEach((item) => {
     let key = `${item.Year}-${String(item.Month).padStart(2, '0')}`;
     if (monthlyGroups[key]) {
       monthlyGroups[key].goodPcs += parseInt(item.Good_Pcs) || 0;
@@ -194,6 +385,7 @@ const getMonthlyProductionData = () => {
 
   return Object.values(monthlyGroups);
 };
+
 
 
 const containerStyle = {
@@ -248,7 +440,8 @@ const containerStyle = {
           <Col md={6}>
             <Card style={cardStyle}>
               <Card.Header className="bg-transparent border-bottom-0">
-                <h5 className="mb-0 text-center">Today Production Details ({new Date().toISOString().split('T')[0]})</h5>
+                <p className=" mb-0 text-center fs-5 fw-semibold " >Today Production Details  </p>
+                <p className=" mb-0 text-center fs-6 fw-semibold " >({new Date().toISOString().split('T')[0]})</p>
               </Card.Header>
               <Card.Body>
                 <div style={chartContainerStyle} className="justify-content-center">
@@ -279,7 +472,8 @@ const containerStyle = {
           <Col md={6}>
             <Card style={cardStyle}>
               <Card.Header className="bg-transparent border-bottom-0">
-                <h5 className="mb-0 text-center">This Month Style Distribution ({new Date().toLocaleString('default', { month: 'long', year: 'numeric' })})</h5>
+              <p className=" mb-0 text-center fs-5 fw-semibold " >This Month Style Distribution </p>
+              <p className=" mb-0 text-center fs-6 fw-semibold " > ({new Date().toLocaleString('default', { month: 'long', year: 'numeric' })})</p>
               </Card.Header>
               <Card.Body>
               <div style={chartContainerStyle}>
@@ -317,7 +511,8 @@ const containerStyle = {
           <Col md={12}>
             <Card style={cardStyle}>
               <Card.Header className="bg-transparent border-bottom-0">
-                <h5 className="mb-0 text-center">This Month Overall Good Pieces ({new Date().toLocaleString('default', { month: 'long', year: 'numeric' })})</h5>
+              <p className=" mb-0 text-center fs-5 fw-semibold " >This Month Overall Good Pieces</p>
+              <p className=" mb-0 text-center fs-6 fw-semibold " > ({new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}) </p>
               </Card.Header>
               <Card.Body>
                 <div style={chartContainerStyle}>
@@ -348,16 +543,18 @@ const containerStyle = {
         </Row>
 
 
-        {/* Daily Production Details - Individual Plants */}
+        {/* Daily Production Details - Individual Plants
         {["CTM-P", "CTM-D", "CTM-M"].map((plant) => {
   const plantData = getDailyDataForPlant(plant);
 
   return (
+    
     <Row>
           <Col md={12}>
             <Card style={cardStyle}>
               <Card.Header className="bg-transparent border-bottom-0">
-                <h5 className="mb-0 text-center">This Month Good Pieces - {plant} ({new Date().toLocaleString('default', { month: 'long', year: 'numeric' })})</h5>
+              <p className=" mb-0 text-center fs-5 fw-semibold " >This Month Good Pieces - {plant} </p>
+              <p className=" mb-0 text-center fs-6 fw-semibold " > ({new Date().toLocaleString('default', { month: 'long', year: 'numeric' })})</p>
               </Card.Header>
               <Card.Body>
                 <div style={chartContainerStyle}>
@@ -387,15 +584,61 @@ const containerStyle = {
         </Row>
   );
 })}
-        
+         */}
+
+         {/* Daily Production Details - Individual Plants */}
+{["CTM-P", "CTM-D", "CTM-M"].map((plant) => {
+  // Check if userPlant is empty or matches the current plant
+  if (userRole === 'main admin' || userRole === 'company admin' || userRole === 'all view' ) {
+    const plantData = getDailyDataForPlant(plant);
+
+    return (
+      <Row key={plant}>
+        <Col md={12}>
+          <Card style={cardStyle}>
+            <Card.Header className="bg-transparent border-bottom-0">
+              <p className="mb-0 text-center fs-5 fw-semibold">This Month Good Pieces - {plant}</p>
+              <p className="mb-0 text-center fs-6 fw-semibold">
+                ({new Date().toLocaleString('default', { month: 'long', year: 'numeric' })})
+              </p>
+            </Card.Header>
+            <Card.Body>
+              <div style={chartContainerStyle}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={plantData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+                    <XAxis dataKey="date" angle={-45} textAnchor="end" height={70} />
+                    <YAxis />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                      }}
+                    />
+                    <Legend />
+                    <Line type="monotone" dataKey="goodPcs" stroke="#d800ff" dot={true} name="Good Pieces" strokeWidth={3} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+    );
+  }
+  return null; // Return nothing if the plant is not selected
+})}
+
 
 
         {/* Damage and Shortage Chart */}
         <Row>
           <Col md={12}>
             <Card style={cardStyle}>
-              <Card.Header className="bg-transparent border-bottom-0">
-                <h5 className="mb-0 text-center">This Month Overall Damage Pieces and Cut Panel Shortage ({new Date().toLocaleString('default', { month: 'long', year: 'numeric' })})</h5>
+              <Card.Header className="bg-transparent border-bottom-0">              
+              <p className=" mb-0 text-center fs-5 fw-semibold " >This Month Overall Damage Pieces and Cut Panel Shortage </p>
+              <p className=" mb-0 text-center fs-6 fw-semibold " >({new Date().toLocaleString('default', { month: 'long', year: 'numeric' })})</p>
               </Card.Header>
               <Card.Body>
                 <div style={chartContainerStyle}>
@@ -447,7 +690,7 @@ const containerStyle = {
           <Col md={12}>
             <Card style={cardStyle}>
               <Card.Header className="bg-transparent border-bottom-0">
-                <h5 className="mb-0 text-center">Monthly Production Overview - Good Pieces</h5>
+              <p className=" mb-0 text-center fs-5 fw-semibold " >Monthly Production Overview - Good Pieces</p>
               </Card.Header>
               <Card.Body>
                 <div style={chartContainerStyle}>

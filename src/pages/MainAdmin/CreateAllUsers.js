@@ -40,7 +40,7 @@ function CreateAllUsers() {
       setError("Invalid email address");
       return false;
     }
-    if (role === "plant user" && !plant) {
+    if (role === "plant user" || role==="plant view" && !plant) {
       setError("Please select a plant");
       return false;
     }
@@ -70,7 +70,7 @@ function CreateAllUsers() {
           confirmPassword,
           phone,
           role,
-          plant: role === "plant user" ? plant : " ",
+          plant: role === "plant user" || role==="plant view"  ? plant : " ",
         }),
       });
   
@@ -219,14 +219,18 @@ function CreateAllUsers() {
                   required
                 >
                   <option value="">Select Role</option>
+                  <option value="main admin">Main Admin</option>
                   <option value="company admin">Company Admin</option>
                   <option value="plant user">Plant User</option>
-                  <option value="cut in">Cut In</option>
+                  <option value="cut in">Cutting</option>
+                  <option value="all view">All view</option>
+                  <option value="plant view">Plant view</option>
+                  <option value="cutting view">Cutting view</option>
                 </Form.Control>
               </div>
             </Form.Group>
 
-            {role === "plant user" && (
+            {role === "plant user" || role==="plant view" && (
               <Form.Group controlId="plant">
                 <Form.Label>Plant</Form.Label>
                 <div className="input-group mb-3">

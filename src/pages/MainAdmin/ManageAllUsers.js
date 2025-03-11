@@ -3,9 +3,13 @@ import { Alert, Button, Col, Container, Modal, Row, Table } from 'react-bootstra
 
 
 function ManageAllUsers() {
+  const [mainAdmins, setMainAdmins] = useState([]);
   const [companyAdmins, setCompanyAdmins] = useState([]);
   const [plantUsers, setPlantUsers] = useState([]);
   const [cutinUsers, setCutinUsers] = useState([]);
+  const [allViewUsers, setAllViewUsers] = useState([]);
+  const [plantViewUsers, setPlantViewUsers] = useState([]);
+  const [cuttingViewUsers, setCuttingViewUsers] = useState([]);
   const [error, setError] = useState("");
   const [deleteModal, setDeleteModal] = useState({ 
     show: false, 
@@ -26,12 +30,19 @@ function ManageAllUsers() {
     return response.json();
   })
   .then((data) => {
-    const admins = data.filter((user) => user.role === "company admin");
+    const mainAdmins = data.filter((user) => user.role === "main admin");
+    const companyAdmins = data.filter((user) => user.role === "company admin");
     const plantUsers = data.filter((user) => user.role === "plant user");
     const cutinUsers = data.filter((user) => user.role === "cut in");
-    setCompanyAdmins(admins);
+    const allViewUsers = data.filter((user) => user.role === "all view");
+    const plantViewUsers = data.filter((user) => user.role === "plant view");
+    const cuttingViewUsers = data.filter((user) => user.role === "cutting view");
+    setMainAdmins(mainAdmins);
+    setCompanyAdmins(companyAdmins);
     setPlantUsers(plantUsers);
     setCutinUsers(cutinUsers);
+    setAllViewUsers(allViewUsers);
+    setCuttingViewUsers(cuttingViewUsers);
   })
   .catch(() => {
     setError("Failed to fetch users");
@@ -59,13 +70,26 @@ function ManageAllUsers() {
         if (!response.ok) {
           throw new Error("Failed to delete user");
         }
-        if (userType === "company admin") {
+        if (userType === "main admin") {
+          setMainAdmins(mainAdmins.filter((user) => user.id !== userId));
+        }
+        else if (userType === "company admin") {
           setCompanyAdmins(companyAdmins.filter((user) => user.id !== userId));
-        } else if (userType === "plant user") {
+        }
+         else if (userType === "plant user") {
           setPlantUsers(plantUsers.filter((user) => user.id !== userId));
         }
-        else{
+        else if (userType === "cut in") {
           setCutinUsers(cutinUsers.filter((user) => user.id !== userId));
+        }
+        else if (userType === "all view") {
+          setAllViewUsers(allViewUsers.filter((user) => user.id !== userId));
+        }
+        else if (userType === "plant view") {
+          setPlantViewUsers(plantViewUsers.filter((user) => user.id !== userId));
+        }
+        else if (userType === "cutting view") {
+          setCuttingViewUsers(cuttingViewUsers.filter((user) => user.id !== userId));
         }
         // Close the modal after successful deletion
         setDeleteModal({ show: false, userId: null, userType: "" });
@@ -92,6 +116,44 @@ function ManageAllUsers() {
 
       <Row className="justify-content-center">
       <Col md={6} className="justify-content-center">
+
+
+      <div 
+          className="bg-white rounded shadow-lg p-4 mb-4"
+          style={{ backgroundColor: 'rgba(255,255,255,0.9)' }}
+        >
+          <h3 className="text-center text-primary mb-4">Main Admins</h3>
+          <Table striped bordered hover responsive>
+            <thead className="table-dark">
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {mainAdmins.map((user) => (
+                <tr key={user.id}>
+                  <td>{user.username}</td>
+                  <td>{user.email}</td>
+                  <td>{user.phone}</td>
+                  <td>
+                    <Button 
+                      variant="danger" 
+                      size="sm" 
+                      onClick={() => handleDelete(user.id, "main admin")}
+                    >
+                      Delete
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
+
+
         
         <div 
           className="bg-white rounded shadow-lg p-4 mb-4"
@@ -171,7 +233,7 @@ function ManageAllUsers() {
           className="bg-white rounded shadow-lg p-4 mb-4"
           style={{ backgroundColor: 'rgba(255,255,255,0.9)' }}
         >
-          <h3 className="text-center text-primary mb-4">Cut In Users</h3>
+          <h3 className="text-center text-primary mb-4">Cutting Users</h3>
           <Table striped bordered hover responsive>
             <thead className="table-dark">
               <tr>
@@ -201,7 +263,118 @@ function ManageAllUsers() {
             </tbody>
           </Table>
         </div>
+
+
+
+        <div 
+          className="bg-white rounded shadow-lg p-4 mb-4"
+          style={{ backgroundColor: 'rgba(255,255,255,0.9)' }}
+        >
+          <h3 className="text-center text-primary mb-4">All View Users</h3>
+          <Table striped bordered hover responsive>
+            <thead className="table-dark">
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {allViewUsers.map((user) => (
+                <tr key={user.id}>
+                  <td>{user.username}</td>
+                  <td>{user.email}</td>
+                  <td>{user.phone}</td>
+                  <td>
+                    <Button 
+                      variant="danger" 
+                      size="sm" 
+                      onClick={() => handleDelete(user.id, "main admin")}
+                    >
+                      Delete
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
       
+
+        <div 
+          className="bg-white rounded shadow-lg p-4 mb-4"
+          style={{ backgroundColor: 'rgba(255,255,255,0.9)' }}
+        >
+          <h3 className="text-center text-primary mb-4">Plant View Users</h3>
+          <Table striped bordered hover responsive>
+            <thead className="table-dark">
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Plant</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {plantViewUsers.map((user) => (
+                <tr key={user.id}>
+                  <td>{user.username}</td>
+                  <td>{user.email}</td>
+                  <td>{user.phone}</td>
+                  <td>{user.plant}</td>
+                  <td>
+                    <Button 
+                      variant="danger" 
+                      size="sm" 
+                      onClick={() => handleDelete(user.id, "main admin")}
+                    >
+                      Delete
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
+
+
+
+        <div 
+          className="bg-white rounded shadow-lg p-4 mb-4"
+          style={{ backgroundColor: 'rgba(255,255,255,0.9)' }}
+        >
+          <h3 className="text-center text-primary mb-4">Cutting View Users</h3>
+          <Table striped bordered hover responsive>
+            <thead className="table-dark">
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cuttingViewUsers.map((user) => (
+                <tr key={user.id}>
+                  <td>{user.username}</td>
+                  <td>{user.email}</td>
+                  <td>{user.phone}</td>
+                  <td>
+                    <Button 
+                      variant="danger" 
+                      size="sm" 
+                      onClick={() => handleDelete(user.id, "main admin")}
+                    >
+                      Delete
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
 
     </Col>     
         </Row> 

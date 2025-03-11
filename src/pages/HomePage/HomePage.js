@@ -2,6 +2,7 @@ import React from "react";
 import { Container } from "react-bootstrap";
 import TableDisplay from "../../components/TableDisplay/TableDisplay";
 
+
 function HomePage() {
   return (
     <div 
@@ -11,8 +12,8 @@ function HomePage() {
       padding: '20px 0'
     }}
   >
-      <Container className="mt-4">
-          <TableDisplay />
+      <Container className="mt-4">            
+         <TableDisplay />
       </Container>
     </div>
   );

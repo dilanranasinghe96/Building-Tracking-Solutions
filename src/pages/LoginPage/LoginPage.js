@@ -18,13 +18,17 @@ function LoginPage() {
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (user) {
-      if (user.role === "company admin") {
-        navigate("/companyadmin");
-      } else if (user.role === "main admin") {
-        navigate("/mainadmin");
-      } else if (user.role === "cut in") {
+      if (user.role === "company admin" || user.role === "main admin" || user.role === "all view" || user.role === "plant view") {
+        navigate("/cadmindashboard");       
+      }
+      else if (user.role === "plant user") {
+        navigate("/home");
+      }
+       else if (user.role === "cut in") {
         navigate("/cutintag");
       }
+      
+      
     }
   }, [navigate]);
 
@@ -60,15 +64,14 @@ function LoginPage() {
         
   
         // Navigate based on role
-        if (userData.role === "company admin") {
+        if (userData.role === "company admin" || userData.role === "main admin" || userData.role === "all view" || userData.role === "plant view")  {
           navigate("/cadmindashboard");
-        } else if (userData.role === "plant user" || userData.role === "user") {
+        } else if (userData.role === "plant user") {
           navigate("/home");
-        } else if (userData.role === "main admin") {
-          navigate("/cadmindashboard");
-        } else if (userData.role === "cut in") {
+        }  else if (userData.role === "cut in") {
           navigate("/cutintag");
         }
+        
       }, 1500);
       
     } catch (error) {
@@ -169,9 +172,9 @@ function LoginPage() {
        <Alert 
          show={showSuccessAlert} 
         variant="success" 
-        className="position-absolute top-0 start-50 translate-middle-x mt-3 p-2 px-4"
+        className="position-absolute top-50 start-50 translate-middle-x p-2 px-4"
       >
-         Successfully logged in!
+         Login Successfully!
       </Alert>
 
     </div>
