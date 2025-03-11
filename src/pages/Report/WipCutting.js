@@ -83,7 +83,7 @@ const WipCutting = () => {
     <div style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', minHeight: '100vh', padding: '20px 0' }}>
       <Container className="mt-4">
         <div className="bg-white rounded shadow-lg p-4">
-          <h3 className="text-primary mb-4 text-center">Finish Goods Stock</h3>
+          <h3 className="text-primary mb-4 text-center">WIP Cutting</h3>
 
           {/* Search Input */}
           <div className="d-flex justify-content-end mb-3">

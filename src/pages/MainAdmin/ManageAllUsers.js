@@ -42,6 +42,7 @@ function ManageAllUsers() {
     setPlantUsers(plantUsers);
     setCutinUsers(cutinUsers);
     setAllViewUsers(allViewUsers);
+    setPlantViewUsers(plantViewUsers);
     setCuttingViewUsers(cuttingViewUsers);
   })
   .catch(() => {

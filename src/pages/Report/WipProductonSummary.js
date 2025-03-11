@@ -76,8 +76,8 @@ const WipProductonSummary = () => {
 
   return (
     <div style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', minHeight: '100vh', padding: '20px 0' }}>
-      <Container fluid className="d-flex justify-content-center mb-4 w-75">
-  <div className="bg-white rounded shadow-lg p-4 w-75 text-center">
+      <Container fluid className="d-flex justify-content-center mb-4 ">
+  <div className="bg-white rounded shadow-lg p-4 text-center">
           <h3 className="text-primary mb-4 text-center">WIP Production Summary</h3>
 
           {/* Search Input */}

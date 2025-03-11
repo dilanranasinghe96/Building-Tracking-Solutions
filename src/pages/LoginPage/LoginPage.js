@@ -28,6 +28,9 @@ function LoginPage() {
         navigate("/cutintag");
       }
       
+      else if (user.role === "cutting view") {
+        navigate("/WipCutting");
+      }
       
     }
   }, [navigate]);
@@ -70,8 +73,10 @@ function LoginPage() {
           navigate("/home");
         }  else if (userData.role === "cut in") {
           navigate("/cutintag");
+        }        
+        else if (userData.role === "cutting view") {
+          navigate("/WipCuttingSummary");
         }
-        
       }, 1500);
       
     } catch (error) {

@@ -49,6 +49,8 @@ function App() {
             <Route path="/home" element={<HomePage />} />
             <Route path="/fgStock" element={<FgStock />} />
             <Route path="/FgSummary" element={<FgSummary />} />
+            <Route path="/cadmindashboard" element={<CompanyAdminPage />} />            
+
           </Route>
 
           <Route element={<PrivateRoute allowedRoles={["company admin","main admin"]} />}>
@@ -58,9 +60,6 @@ function App() {
             
           </Route>
 
-          <Route element={<PrivateRoute allowedRoles={["company admin","main admin","all view","plant view"]} />}>
-            <Route path="/cadmindashboard" element={<CompanyAdminPage />} />            
-          </Route>
 
 
           <Route element={<PrivateRoute allowedRoles={["company admin","main admin","plant user","all view","plant view"]} />}>           

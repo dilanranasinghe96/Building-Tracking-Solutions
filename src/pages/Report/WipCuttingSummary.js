@@ -24,8 +24,8 @@ const SummaryTable = ({ title, data }) => {
   return (
 
 
-    <Container fluid className="d-flex justify-content-center mb-4">
-  <div className="bg-white rounded shadow-lg p-4 w-75 text-center">
+    <Container fluid className="d-flex justify-content-center mb-4 ">
+  <div className="bg-white rounded shadow-lg p-4  text-center">
 
        <div className="mb-4">
       <h4 className="text-primary text-center mb-4">{title}</h4>
@@ -36,6 +36,7 @@ const SummaryTable = ({ title, data }) => {
               {headerGroup.headers.map(column => (
                 <th {...column.getHeaderProps(column.getSortByToggleProps())}>
                   {column.render("Header")}
+                  <span>{column.isSorted ? (column.isSortedDesc ? " 🔽" : " 🔼") : ""}</span>
                 </th>
               ))}
             </tr>
@@ -80,21 +81,24 @@ const WipCuttingSummary = () => {
       .catch(error => console.error("Error fetching data:", error));
   }, [BASE_URL]);
 
-  const groupedAllData = {
-    "All Plants": allData,
-  };
-  
+
   return (
-    <Container fluid>
-      <h3 className="text-white mb-4 text-center">Finish Goods Summary</h3>
-      
-      
-        {Object.entries(allData).map(([title, data]) => (
-          <SummaryTable key={title} title={title} data={data} />
-        ))}
-      
-    </Container>
+    <div 
+      style={{
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
+        minHeight: '100vh', 
+        padding: '20px 0'
+      }}
+    >
+      <Container fluid className="mt-4">
+        <h3 className="text-white mb-4 text-center">WIP Cutting Summary</h3>
+        
+        <SummaryTable title="" data={allData} />
+        
+      </Container>
+    </div>
   );
+  
   
 };
 

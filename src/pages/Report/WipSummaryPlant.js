@@ -24,8 +24,8 @@ const SummaryTable = ({ title, data }) => {
   return (
 
 
-    <Container fluid className="d-flex justify-content-center mb-4 w-75">
-  <div className="bg-white rounded shadow-lg p-4 w-75 text-center">
+    <Container fluid className="d-flex justify-content-center mb-4 ">
+  <div className="bg-white rounded shadow-lg p-4 text-center">
 
        <div className="mb-4">
       <h4 className="text-primary text-center mb-4">{title}</h4>  
