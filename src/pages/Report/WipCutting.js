@@ -10,7 +10,8 @@ import {
   useTable
 } from 'react-table';
 
-import { Search } from "lucide-react";
+import { Search,Download } from "lucide-react";
+import * as XLSX from 'xlsx';
 
 
 
@@ -37,10 +38,25 @@ const WipCutting = () => {
   
   }, [BASE_URL]);
 
+  const downloadExcel = () => {
+    // Create a new workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(items);
+    
+    // Add the worksheet to the workbook
+    XLSX.utils.book_append_sheet(wb, ws, "WIP Cutting");
+    
+    // Generate Excel file and trigger download
+    XLSX.writeFile(wb, "WIP_Cutting.xlsx");
+  };
+
+
+
+
   // Table Columns
   const columns = useMemo(
     () => [
-      
+      { Header: 'bno', accessor: 'bno' },
       { Header: 'SO', accessor: 'SO' },
       { Header: 'Style', accessor: 'Style'},
       { Header: 'Style Name', accessor: 'Style_Name' },
@@ -83,7 +99,17 @@ const WipCutting = () => {
     <div style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', minHeight: '100vh', padding: '20px 0' }}>
       <Container className="mt-4">
         <div className="bg-white rounded shadow-lg p-4">
-          <h3 className="text-primary mb-4 text-center">WIP Cutting</h3>
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <h3 className="text-primary m-0">WIP Cutting</h3>
+          <Button 
+            variant="success" 
+            onClick={downloadExcel} 
+            className="d-flex align-items-center gap-2"
+          >
+            <Download size={18} />
+            {/* <span>Download Excel</span> */}
+          </Button>
+        </div>
 
           {/* Search Input */}
           <div className="d-flex justify-content-end mb-3">
@@ -117,7 +143,7 @@ const WipCutting = () => {
                   </tr>
                 ))}
               </thead>
-              <tbody {...getTableBodyProps()} className='text-center'>
+              <tbody {...getTableBodyProps()} >
                 {page.map((row) => {
                   prepareRow(row);
                   return (

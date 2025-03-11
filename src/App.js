@@ -22,7 +22,6 @@ import ProductionSummary from "./pages/Report/ProductionSummary";
 import WipCutting from "./pages/Report/WipCutting";
 import WipCuttingSummary from "./pages/Report/WipCuttingSummary";
 import WipProducton from "./pages/Report/WipProducton";
-import WipProductonSummary from "./pages/Report/WipProductonSummary";
 import WipSummaryPlant from "./pages/Report/WipSummaryPlant";
 
 
@@ -65,7 +64,6 @@ function App() {
           <Route element={<PrivateRoute allowedRoles={["company admin","main admin","plant user","all view","plant view"]} />}>           
             <Route path="/ProductionSummary" element={<ProductionSummary />} />
             <Route path="/WipProducton" element={<WipProducton />} />
-            <Route path="/WipProductonSummary" element={<WipProductonSummary />} />
             <Route path="/WipSummaryPlant" element={<WipSummaryPlant />} />
             
           </Route>

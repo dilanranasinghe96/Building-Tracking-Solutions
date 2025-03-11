@@ -1,11 +1,13 @@
 
 
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { Download } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
-import { Container, Table } from 'react-bootstrap';
+import { Button, Container, Table } from 'react-bootstrap';
 import { useSortBy, useTable } from 'react-table';
+import * as XLSX from 'xlsx';
 
-const SummaryTable = ({ title, data }) => {
+const SummaryTable = ({ title, data,onDownload }) => {
   const columns = useMemo(() => [
     { Header: 'Style Name', accessor: 'Style_Name' },
     { Header: 'Available Qty', accessor: 'Available_Qty' }
@@ -28,7 +30,18 @@ const SummaryTable = ({ title, data }) => {
   <div className="bg-white rounded shadow-lg p-4 text-center">
 
        <div className="mb-4">
-      <h4 className="text-primary text-center mb-4">{title}</h4>  
+       <div className="d-flex justify-content-between align-items-center mb-4">
+            <h4 className="text-primary m-0">{title}</h4>
+            <Button 
+              variant="success" 
+              onClick={() => onDownload(data, title)} 
+              className="d-flex align-items-center gap-2"
+              size="sm"
+            >
+              <Download size={16} />
+              {/* <span>Download Excel</span> */}
+            </Button>
+          </div>
       <Table striped bordered hover {...getTableProps()}>
         <thead className="table-dark">
           {headerGroups.map(headerGroup => (
@@ -42,7 +55,7 @@ const SummaryTable = ({ title, data }) => {
             </tr>
           ))}
         </thead>
-        <tbody {...getTableBodyProps()}>
+        <tbody {...getTableBodyProps()} className="text-start">
           {rows.map(row => {
             prepareRow(row);
             return (
@@ -89,6 +102,49 @@ const WipSummaryPlant = () => {
   };
   
 
+  const downloadExcel = (data, title) => {
+    // Create a copy of data with grand total row included
+    const grandTotal = data.reduce((sum, row) => sum + row.Available_Qty, 0);
+    const dataWithTotal = [
+      ...data,
+      { Style_Name: 'Grand Total', Available_Qty: grandTotal }
+    ];
+
+    // Create a new workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(dataWithTotal);
+    
+    // Add the worksheet to the workbook
+    XLSX.utils.book_append_sheet(wb, ws, title);
+    
+    // Generate Excel file and trigger download
+    XLSX.writeFile(wb, `${title}_WIP_Summary.xlsx`);
+  };
+
+
+
+
+  // Function to download all data as Excel with multiple sheets
+  const downloadAllExcel = () => {
+    const wb = XLSX.utils.book_new();
+    
+    // Add a sheet for each group
+    Object.entries(groupedAllData).forEach(([title, data]) => {
+      // Include grand total row
+      const grandTotal = data.reduce((sum, row) => sum + row.Available_Qty, 0);
+      const dataWithTotal = [
+        ...data,
+        { Style_Name: 'Grand Total', Available_Qty: grandTotal }
+      ];
+      
+      const ws = XLSX.utils.json_to_sheet(dataWithTotal);
+      XLSX.utils.book_append_sheet(wb, ws, title);
+    });
+    
+    // Generate Excel file with all sheets
+    XLSX.writeFile(wb, "Complete_WIP_Summary.xlsx");
+  };
+
   return (
     <div 
     style={{
@@ -98,15 +154,40 @@ const WipSummaryPlant = () => {
     }}
   >
       <Container fluid className="mt-4">
-      <h3 className="text-white mb-4 text-center">WIP Production Summary - Plant</h3>
-      
+      <div className="mb-4">
+  <h3 className="text-white mb-3 text-center w-100">WIP Production Summary</h3>
+  
+  <div className="w-100 d-flex justify-content-end">
+    {(userRole === 'main admin' || userRole === 'company admin' || userRole === 'all view') && (
+      <Button 
+        variant="success" 
+        onClick={downloadAllExcel} 
+        className="d-flex align-items-center gap-2"
+      >
+        <Download size={18} />
+        <span>Download All</span>
+      </Button>
+    )}
+  </div>
+</div>
+     
       {userRole === 'main admin' || userRole === 'company admin' || userRole === 'all view' ? (
-        Object.entries(groupedAllData).map(([title, data]) => (
-          <SummaryTable key={title} title={title} data={data} />
-        ))
-      ) : (
-        <SummaryTable key={userPlant} title={userPlant} data={groupedAllData[userPlant] || []} />
-      )}
+          Object.entries(groupedAllData).map(([title, data]) => (
+            <SummaryTable 
+              key={title} 
+              title={title} 
+              data={data} 
+              onDownload={downloadExcel}
+            />
+          ))
+        ) : (
+          <SummaryTable 
+            key={userPlant} 
+            title={userPlant} 
+            data={groupedAllData[userPlant] || []} 
+            onDownload={downloadExcel}
+          />
+        )}  
     </Container>
     </div>
   );

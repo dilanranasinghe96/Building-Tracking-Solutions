@@ -22,7 +22,7 @@ function LoginPage() {
         navigate("/cadmindashboard");       
       }
       else if (user.role === "plant user") {
-        navigate("/home");
+        navigate("/cadmindashboard");
       }
        else if (user.role === "cut in") {
         navigate("/cutintag");
@@ -70,7 +70,7 @@ function LoginPage() {
         if (userData.role === "company admin" || userData.role === "main admin" || userData.role === "all view" || userData.role === "plant view")  {
           navigate("/cadmindashboard");
         } else if (userData.role === "plant user") {
-          navigate("/home");
+          navigate("/cadmindashboard");
         }  else if (userData.role === "cut in") {
           navigate("/cutintag");
         }        

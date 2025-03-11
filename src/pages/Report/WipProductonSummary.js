@@ -47,6 +47,8 @@ const WipProductonSummary = () => {
     []
   );
 
+  
+
   const {
     getTableProps,
     getTableBodyProps,
@@ -112,7 +114,7 @@ const WipProductonSummary = () => {
                   </tr>
                 ))}
               </thead>
-              <tbody {...getTableBodyProps()} className='text-center'>
+              <tbody {...getTableBodyProps()} >
                 {page.map((row) => {
                   prepareRow(row);
                   return (

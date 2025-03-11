@@ -77,7 +77,7 @@ const CustomNavbar = ({ children }) => {
   const PlantUserNavbar = () => (
     <Navbar style={NavbarStyles} variant="dark" expand="lg" sticky="top" className="py-2">
       <Container fluid>
-        <Navbar.Brand href="/home" className="fw-bold fs-3 text-center">
+        <Navbar.Brand href="/cadmindashboard" className="fw-bold fs-3 text-center">
           <img src={logo} width="50" height="50" className="d-inline-block align-top" alt="Logo" />
           BTS
         </Navbar.Brand>
@@ -118,6 +118,10 @@ const CustomNavbar = ({ children }) => {
                 id="users-dropdown" 
                 className="me-2 border-0"
               >
+                <NavDropdown.Item onClick={() => navigate("/home")} className="d-flex align-items-center gap-2">
+                  <Package size={20}/>
+                  Fg List
+                </NavDropdown.Item>
                 <NavDropdown.Item onClick={() => navigate("/fgStock")} className="d-flex align-items-center gap-2">
                   <Package size={20}/>
                   Fg Stock
@@ -128,20 +132,17 @@ const CustomNavbar = ({ children }) => {
                 </NavDropdown.Item>
                 <NavDropdown.Item onClick={() => navigate("/ProductionSummary")} className="d-flex align-items-center gap-2">
                   <Package size={20}/>
-                  Production Summary
+                  Fg Stock Summary
                 </NavDropdown.Item> 
 
                 <NavDropdown.Item onClick={() => navigate("/WipProducton")} className="d-flex align-items-center gap-2">
                   <Package size={20}/>
                   Wip Production
                 </NavDropdown.Item> 
-                <NavDropdown.Item onClick={() => navigate("/WipProductonSummary")} className="d-flex align-items-center gap-2">
-                  <Package size={20}/>
-                  Wip Production Summary
-                </NavDropdown.Item> 
+ 
                 <NavDropdown.Item onClick={() => navigate("/WipSummaryPlant")} className="d-flex align-items-center gap-2">
                   <Package size={20}/>
-                  Wip Summary Plant
+                  Wip Production Summary
                 </NavDropdown.Item> 
                
               </NavDropdown>
@@ -257,19 +258,16 @@ const CustomNavbar = ({ children }) => {
                 </NavDropdown.Item>
                 <NavDropdown.Item onClick={() => navigate("/ProductionSummary")} className="d-flex align-items-center gap-2">
                   <Package size={20}/>
-                  Production Summary
+                  Fg Stock Summary
                 </NavDropdown.Item> 
                 <NavDropdown.Item onClick={() => navigate("/WipProducton")} className="d-flex align-items-center gap-2">
                   <Package size={20}/>
                   Wip Production
                 </NavDropdown.Item> 
-                <NavDropdown.Item onClick={() => navigate("/WipProductonSummary")} className="d-flex align-items-center gap-2">
-                  <Package size={20}/>
-                  Wip Production Summary
-                </NavDropdown.Item> 
+ 
                 <NavDropdown.Item onClick={() => navigate("/WipSummaryPlant")} className="d-flex align-items-center gap-2">
                   <Package size={20}/>
-                  Wip Summary Plant
+                  Wip Production Summary
                 </NavDropdown.Item>  
                 
                 
@@ -365,20 +363,17 @@ const CustomNavbar = ({ children }) => {
                 </NavDropdown.Item>
                 <NavDropdown.Item onClick={() => navigate("/ProductionSummary")} className="d-flex align-items-center gap-2">
                   <Package size={20}/>
-                  Production Summary
+                  Fg Stock Summary
                 </NavDropdown.Item>     
 
                 <NavDropdown.Item onClick={() => navigate("/WipProducton")} className="d-flex align-items-center gap-2">
                   <Package size={20}/>
                   Wip Production
                 </NavDropdown.Item> 
-                <NavDropdown.Item onClick={() => navigate("/WipProductonSummary")} className="d-flex align-items-center gap-2">
-                  <Package size={20}/>
-                  Wip Production Summary
-                </NavDropdown.Item> 
+ 
                 <NavDropdown.Item onClick={() => navigate("/WipSummaryPlant")} className="d-flex align-items-center gap-2">
                   <Package size={20}/>
-                  Wip Summary Plant
+                  Wip Production Summary
                 </NavDropdown.Item>  
                 <NavDropdown.Item onClick={() => navigate("/WipCutting")} className="d-flex align-items-center gap-2">
                   <Package size={20}/>
@@ -466,19 +461,16 @@ const CustomNavbar = ({ children }) => {
                 </NavDropdown.Item>
                 <NavDropdown.Item onClick={() => navigate("/ProductionSummary")} className="d-flex align-items-center gap-2">
                   <Package size={20}/>
-                  Production Summary
+                  Fg Stock Summary
                 </NavDropdown.Item> 
                 <NavDropdown.Item onClick={() => navigate("/WipProducton")} className="d-flex align-items-center gap-2">
                   <Package size={20}/>
                   Wip Production
                 </NavDropdown.Item> 
-                <NavDropdown.Item onClick={() => navigate("/WipProductonSummary")} className="d-flex align-items-center gap-2">
-                  <Package size={20}/>
-                  Wip Production Summary
-                </NavDropdown.Item> 
+ 
                 <NavDropdown.Item onClick={() => navigate("/WipSummaryPlant")} className="d-flex align-items-center gap-2">
                   <Package size={20}/>
-                  Wip Summary Plant
+                  Wip Production Summary
                 </NavDropdown.Item>    
                 <NavDropdown.Item onClick={() => navigate("/WipCutting")} className="d-flex align-items-center gap-2">
                   <Package size={20}/>
@@ -547,19 +539,16 @@ const CustomNavbar = ({ children }) => {
                 </NavDropdown.Item>
                 <NavDropdown.Item onClick={() => navigate("/ProductionSummary")} className="d-flex align-items-center gap-2">
                   <Package size={20}/>
-                  Production Summary
+                  Fg Stock Summary
                 </NavDropdown.Item>  
                 <NavDropdown.Item onClick={() => navigate("/WipProducton")} className="d-flex align-items-center gap-2">
                   <Package size={20}/>
                   Wip Production
                 </NavDropdown.Item> 
-                <NavDropdown.Item onClick={() => navigate("/WipProductonSummary")} className="d-flex align-items-center gap-2">
-                  <Package size={20}/>
-                  Wip Production Summary
-                </NavDropdown.Item> 
+ 
                 <NavDropdown.Item onClick={() => navigate("/WipSummaryPlant")} className="d-flex align-items-center gap-2">
                   <Package size={20}/>
-                  Wip Summary Plant
+                  Wip Production Summary
                 </NavDropdown.Item>              
                
               </NavDropdown>
